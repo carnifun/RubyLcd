@@ -75,7 +75,7 @@ module RubyLcd
         if (ip)
           RubyLcd.print({text:"IP:             #{ip}"})
         else
-          RubyLcd.print({text:"Warte auf        Netzwerk#{'.'*i+1}"})
+          RubyLcd.print({text:"Warte auf        Netzwerk#{ '.' * (i+1) }"})
         end
         sleep(5)
         break if ip
