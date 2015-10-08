@@ -4,13 +4,8 @@ module RubyLcd
   class Request    
     require 'json'
     require 'thread'
-    @@last_requests = nil
+    @@last_requests = []
     
-    
-    def flash()
-      message = @object.message
-    end
-
     def initialize message
       return if message.nil?
       @object = begin
@@ -18,33 +13,37 @@ module RubyLcd
       rescue
         nil
       end
-      if !@@last_requests 
-        @@last_requests = Queue.new
-      end
-      @@last_requests << @object unless @object[:flash] 
+      add_request @object if !@object.nil?
     end
-
-    def _run
-      return if @@queue.size > 1
-      loop do 
-        sleep(5)
-        puts "in the loop "
-        puts "size :#{@@queue.size} "
-        object = @@queue.pop
-        break if @@queue.empty?
-      end
+    
+    def add_request(object)
+      @@last_requests.pop if @@last_requests.size >=10        
+      @@last_requests << object unless object[:flash]
     end
-
+    
+    def get_extra_text(row)
+      i = 0
+      row = (row == BOTTOM_ROW) ? TOP_ROW : BOTTOM_ROW
+      @@last_requests.reverse_each do |request|
+        i +=1 
+        next if i==1 # skip first request
+        if request[:single_line] == row
+          return request[:text]
+        end
+      end
+      nil
+    end
+    
     def run
       require 'pry'      
       Server.kill_others()
+      if @object[:single_line]
+        @object[:extra_text] ||= get_extra_text(@object[:single_line]) 
+      end
+      
       RubyLcd.print(@object)
-      puts " ab hier ======"
       if @object[:flash]
-        binding.pry
-        last_request = @@last_requests.pop
-        @@last_requests << last_request
-        RubyLcd.print(last_request) if last_request
+        RubyLcd.print(@@last_requests.last) unless @@last_requests.nil?
       end
     end
   end
@@ -55,22 +54,14 @@ module RubyLcd
     
     STATUS_INTERUPT = 1
 
-    def self.queue
-      @queue
-    end
-
     def self.kill_others
       @threads.each do |t|
-          puts "therad with #{t}"
-          puts "therad with #{t.object_id}"
-          puts "Current therad with #{Thread.current.object_id}"
           Thread.kill t if (t.object_id != Thread.current.object_id)           
       end if !@threads.nil?
       @threads = [Thread.current]
     end
 
     def self.start
-
       @threads = []
       Thread::abort_on_exception = true  
       server = TCPServer.new("localhost", 2000)  # Server bind to port 2000
@@ -80,8 +71,7 @@ module RubyLcd
             message = client.gets
             if !message.nil?
               r = Request.new(message)
-              puts "was hier"
-              responce = r.run
+              r.run
               #client.puts "responce"
             end
             client.close

@@ -2,9 +2,9 @@ module RubyLcd
   class Client
     require 'socket'
 
-    def self.single_line(msg="singel line message ffrom client ")
+    def self.single_line(msg="singel line message ffrom client ", row = 1 )
 
-      request = "{\"text\":\"#{msg}\", \"single_line\":\"true\" }\r\n"
+      request = "{\"text\":\"#{msg}\", \"single_line\":\"#{row}\" }\r\n"
 
       socket = TCPSocket.open("127.0.0.1","2000")
       socket.print(request)               # Send request

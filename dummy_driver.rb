@@ -1,4 +1,11 @@
+    class String
+      def to_40
+        self + " " * (40 - size)
+      end
+    end
 module RubyLcd
+      TOP_ROW = "1"  
+      BOTTOM_ROW = "2"  
   class << self
     def driver
       DummyDriver
@@ -6,12 +13,24 @@ module RubyLcd
     def print(args)
       driver.print(args)      
     end
-    def flash(queue)
-      driver.flash(queue)      
+    def print_top(message)
+      driver.print({text: message, single_line: TOP_ROW})      
+    end
+    def print_bottom(message)
+      driver.print({text: message, single_line: BOTTOM_ROW})      
+    end
+    def flash(message)      
+      driver.print({text: message, flash: true})      
+    end
+    def clear(args=nil)
+      driver.clear(args)      
     end
   end
 
   class DummyDriver
+
+
+    
 
     # R/W pin is pulled low (write only)
     # 'enable' pin is toggled to write data to the registers
@@ -58,48 +77,42 @@ module RubyLcd
     @@charCount = 0
     @@onPi      = true # So I can debug the non-RaspberryPi code on a separate machine
     @@initialized = false
-    @@lines_buffer = nil
-    PAGES_VIEW_INTERVALL = 2 
+    PAGES_VIEW_INTERVALL = 2
+
     class << self
       #must have at least 40 chars 
       def write_string(string)
         lines = string.scan(/.{1,40}/)
+        puts "Buffer "
+        puts lines.inspect
+        puts "Buffer "
         #@@lines_buffer ||= Queue.new
-        @@lines_buffer = lines
         
         File.open("output.txt", "w+") do | f |
           f.puts lines.join("\n")
         end        
       end
 
-      def nextLine()
-        # Display automatically goes to next line when we hit 40 chars
-        fillStr  = " "
-        fillCntr = 1
-
-        while (@@charCount + fillCntr < 40)
-          fillStr += " "
-          fillCntr += 1
-        end
-
-        Lcd1602Driver.doLcdPrint(fillStr)
-
-        @@charCount = 0
-      end
-
 
       def print_single_line (args)
+                
         text = args[:text]
+                
+        extra_text = args[:extra_text] || " ".to_40
+        if extra_text              
+          extra_text = extra_text.scan(/.{1,40}/).first
+          extra_text = extra_text.to_40
+        end          
         start_pos = 0 
         loop do
           end_pos = (start_pos + 15 > text.size-1) ?  text.size-1 : start_pos + 15    
           line = text[start_pos..end_pos]
-          line +=  " " * 24
+          line = line.to_40          
+          line = (args[:single_line] == TOP_ROW) ? line + extra_text : extra_text + line   
           write_string(line)
           sleep(1) if start_pos == 0
           start_pos +=1
           if start_pos >= end_pos
-            break if args[:flash]           
             start_pos = 0
           end 
           sleep(0.4)
@@ -109,8 +122,8 @@ module RubyLcd
       def print_multi_lines (args)        
         text = args[:text]
         lines = text.scan(/.{1,16}/)
-        lines = lines.map{|p| p + " " * 24}
-        lines << " " * 40 if lines.size.odd?
+        lines = lines.map{|p| p.to_40}
+        lines << " ".to_40 if lines.size.odd?
         
         pages = lines.each_slice(2).map do | top_line, bottom_line |
           top_line + bottom_line
@@ -124,14 +137,8 @@ module RubyLcd
           break if args[:flash] || pages.size == 1
         end        
       end
-      
       def print (args)
-        
-        puts "====== buffer ============"
-        puts @@lines_buffer if !@@lines_buffer.nil?
-        puts "=================="
         args = {text: args} if args.is_a?(String)
-        puts args 
         single_line    = args[:single_line] || false
         if single_line         
           print_single_line(args) 
