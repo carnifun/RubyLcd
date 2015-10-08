@@ -4,11 +4,12 @@
       end
     end
 module RubyLcd
-      TOP_ROW = "1"  
+     TOP_ROW = "1"  
       BOTTOM_ROW = "2"  
   class << self
     def driver
-      DummyDriver
+      Lcd1602Driver.init unless Lcd1602Driver.initialized?
+      Lcd1602Driver
     end
     def print(args)
       driver.print(args)      
@@ -27,10 +28,8 @@ module RubyLcd
     end
   end
 
-  class DummyDriver
-
-
-    
+  class Lcd1602Driver
+    require 'wiringpi'
 
     # R/W pin is pulled low (write only)
     # 'enable' pin is toggled to write data to the registers
@@ -78,19 +77,150 @@ module RubyLcd
     @@onPi      = true # So I can debug the non-RaspberryPi code on a separate machine
     @@initialized = false
     PAGES_VIEW_INTERVALL = 2
-
     class << self
-      #must have at least 40 chars 
+      def initialized?
+        @@initialized
+      end
+
+      def init
+        if (@@onPi == true)
+          Wiringpi.wiringPiSetup
+
+          # Set all pins to output mode (not sure if this is needed)
+          Wiringpi.pinMode(P_RS, 1)
+          Wiringpi.pinMode(P_EN, 1)
+          Wiringpi.pinMode(P_D4, 1)
+          Wiringpi.pinMode(P_D5, 1)
+          Wiringpi.pinMode(P_D6, 1)
+          Wiringpi.pinMode(P_D7, 1)
+
+          initDisplay()
+          sleep T_MS * 10
+          lcdDisplay(ON, ON, OFF)
+          setEntryMode()
+        @@initialized = true
+        end
+      end
+
+      def setEntryMode()
+        # Entry mode set: move cursor to right after each DD/CGRAM write
+        command(0)
+        command(0b0110)
+      end
+
+      def pulseEnable()
+        # Indicate to LCD that command should be 'executed'
+        Wiringpi.digitalWrite(P_EN, 0)
+        sleep T_MS * 10
+        Wiringpi.digitalWrite(P_EN, 1)
+        sleep T_MS * 10
+        Wiringpi.digitalWrite(P_EN, 0)
+        sleep T_MS * 10
+      end
+
+      def write(byte)
+        Wiringpi.digitalWrite(P_RS, 1)
+        Wiringpi.digitalWrite(P_D7, byte & P_D7_BIT_MASK)
+        Wiringpi.digitalWrite(P_D6, byte & P_D6_BIT_MASK)
+        Wiringpi.digitalWrite(P_D5, byte & P_D5_BIT_MASK)
+        Wiringpi.digitalWrite(P_D4, byte & P_D4_BIT_MASK)
+        sleep T_MS
+        pulseEnable()
+      end
+      def command(byte)
+        Wiringpi.digitalWrite(P_RS, 0)
+        Wiringpi.digitalWrite(P_D7, byte & P_D7_BIT_MASK)
+        Wiringpi.digitalWrite(P_D6, byte & P_D6_BIT_MASK)
+        Wiringpi.digitalWrite(P_D5, byte & P_D5_BIT_MASK)
+        Wiringpi.digitalWrite(P_D4, byte & P_D4_BIT_MASK)
+        sleep T_MS
+        pulseEnable()
+      end
+
+      # Turn on display and cursor
+      def lcdDisplay(display, cursor, block)
+        command(0)
+        command("1#{display}#{cursor}#{block}".to_i(2))
+        # display # 1 = 0n
+        # cursor # 1 = Cursor on, 0 = Cursor off
+        # block  # 1 = Block, 0 = Underline cursor
+      end
+
+      def write_char(byte)
+        # Write data to CGRAM/DDRAM
+        # write left and right byte
+        puts byte
+        puts "written"
+        write(byte[0..3].to_i(2))
+        write(byte[4..7].to_i(2))
+        @@charCount += 1
+      end
+
+      def cls()
+        # Clear all data from screen
+        commad(0)
+        command(0b0001)
+      end
+      #LCD_SETDDRAMADDR = 0x80
+      #def set_cursor ( col, row )
+      #  row_offsets = [ 0x00, 0x40, 0x14, 0x54]
+                  
+        # command(LCD_SETDDRAMADDR | (col + row_offsets[row]));
+      #end
+
+      def initDisplay()
+        # Set function to 4 bit operation
+        i = 0
+        3.times do    # Needs to be executed 3 times
+        # Wait > 40 MS
+          sleep 42 * T_MS
+          command(0b0011)
+        end
+
+        # Function set to 4 bit
+        # Needs to be executed 2 times
+        2.times do
+          command(0b0010)
+        end
+
+        # Set number of display lines
+        # P_D7 N = 0 = 1 line display
+        #  PD6 F = 0 = 5x8 character font
+        command(0b1000)
+
+        # Display Off (2 blocks)
+        command(0)
+
+        command(0b1000)
+
+        # Display clear (2 blocks)
+        command(0)
+
+        command(1)
+
+        # Entry mode set"
+        command(0)
+
+        #P_D5 1 = Increment by 1
+        #P_D4 0 = no shift
+        command(0b0111)
+
+      end
+
       def write_string(string)
+        # Loop through each character in the string, convert it to binary, and print it to the LCD
+        
         lines = string.scan(/.{1,40}/)
         puts "Buffer "
         puts lines.inspect
         puts "Buffer "
-        #@@lines_buffer ||= Queue.new
-        
-        #File.open("output.txt", "w+") do | f |
-        #  f.puts lines.join("\n")
-        #end        
+        lines.each do | l | 
+          l.each_byte do | b |
+              write_char(b.to_s(2))
+          end        
+        end
+        #@@string_buffer ||=[]
+        #@@string_buffer << string        
       end
       def print_single_line (args)
                 
@@ -144,6 +274,13 @@ module RubyLcd
           print_multi_lines(args)
         end 
       end
+
+     
+
+     
+
+      
+
 
     end
   end

@@ -23,18 +23,18 @@ module RubyLcd
     # 15 Backlight LED Anode (+)
     # 16 Backlight LED Cathode (-)
   
-    T_MS = 1.0000000/1000000
-    P_RS = 6
+   T_MS = 1.0000000/1000000
+    P_RS = 11 # GPIO 7
     P_RW = 99 #Bogus number not used at this moment
-    P_EN = 5
+    P_EN = 10 # 8
     P_D0 = 99 #Bogus number not used at this moment
     P_D1 = 99 #Bogus number not used at this moment
     P_D2 = 99 #Bogus number not used at this moment
     P_D3 = 99 #Bogus number not used at this moment
-    P_D4 = 4
-    P_D5 = 0
-    P_D6 = 2
-    P_D7 = 3
+    P_D4 = 6 # 25
+    P_D5 = 5 # 24
+    P_D6 = 4 # 23
+    P_D7 = 1 # 18
     ON   = 1
     OFF  = 0
   
@@ -280,7 +280,7 @@ module RubyLcd
           fillCntr += 1
         end
     
-        RubyLcd.doLcdPrint(fillStr)
+        doLcdPrint(fillStr)
     
         @@charCount = 0
       end
