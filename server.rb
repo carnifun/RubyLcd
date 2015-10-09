@@ -1,4 +1,4 @@
-load  'dummy_driver.rb'
+load  File.join(File.dirname(__FILE__), 'lcd1602_driver.rb')
 
 module RubyLcd
   class Request    
@@ -35,12 +35,13 @@ module RubyLcd
     end
     
     def run
-      require 'pry'      
       Server.kill_others()
       if @object[:single_line]
         @object[:extra_text] ||= get_extra_text(@object[:single_line]) 
       end
-      
+      if @object[:command]
+        return RubyLcd.send(@object[:command])
+      end
       RubyLcd.print(@object)
       if @object[:flash]
         RubyLcd.print(@@last_requests.last) unless @@last_requests.nil?
@@ -60,8 +61,26 @@ module RubyLcd
       end if !@threads.nil?
       @threads = [Thread.current]
     end
-
+    def self.get_ip
+      return nil
+       a =  Socket.ip_address_list.detect{|intf| intf.ipv4_private?}
+       return a.ip_address unless a.nil?
+       nil
+    end
     def self.start
+      RubyLcd.print({text:"Server startet",single_line: "1"})
+      ip = nil
+      5.times do |i|
+        ip = get_ip
+        if (ip)
+          RubyLcd.print({text:"IP:             #{ip}"})
+        else
+          RubyLcd.print({text:"Warte auf       Netzwerk#{ '.' * (i+1) }"})
+        end
+        sleep(5)
+        break if ip
+      end
+      RubyLcd.print({text:"Kein  Netzwerk"}) unless ip
       @threads = []
       Thread::abort_on_exception = true  
       server = TCPServer.new("localhost", 2000)  # Server bind to port 2000

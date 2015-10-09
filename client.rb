@@ -36,5 +36,16 @@ module RubyLcd
       socket.close
       #puts response
     end
+     def self.clear()
+
+      request = "{\"command\":\"clear\"}\r\n"
+
+      socket = TCPSocket.open("127.0.0.1","2000")
+      socket.print(request)               # Send request
+      #response = socket.read              # Read complete response
+      # Split response at first blank line into headers and body
+      socket.close
+      #puts response
+    end
   end
 end
