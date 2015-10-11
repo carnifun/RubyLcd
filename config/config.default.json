@@ -1,0 +1,53 @@
+{
+  "sensors": [
+    {
+      "name":"s1",
+      "description":"Sensor an der Therme 1 ",
+      "id" : "10-000802c68099"
+    },
+    {
+      "name":"s2",
+      "description":"Sensor am uv-pumpe 2 ",
+      "id" : "10-000802bf0598"
+    }
+  ],
+  "actuators" :[
+    {
+      "name":"pumpe-1",
+      "chanel":"1",
+      "rules":[
+        {
+          "action":"on",
+          "and_conditions":
+          [
+            {
+              "sensor":"s1",
+              "comparator":">",
+              "value"     : "50",
+              "tolerance" : "5"
+            },
+            {
+              "sensor":"s2",
+              "comparator":">",
+              "value"     : "60",
+              "tolerance" : "5"
+            }
+          ]
+        },
+        {
+          "action":"off",
+          "and_conditions":[
+            {
+              "sensor":"s1",
+              "comparator":"<",
+              "value"     : "45",
+              "tolerance" : "5"
+            }
+          ]
+        }
+        
+      ]
+      
+    }
+  ]
+}

@@ -1,6 +1,37 @@
 module HeatController
   APP_ROOT = File.dirname(__FILE__)
- 
+  
+  class Lcd
+    require 'socket'
+    def self.sline(msg, row = 1 )
+      request = "{\"text\":\"#{msg}\", \"single_line\":\"#{row}\" }\r\n"
+      socket = TCPSocket.open("127.0.0.1","2000")
+      socket.print(request)               # Send request
+      socket.close
+    end
+    
+    def self.mlines(msg)
+      request = "{\"text\":\"#{msg}\"}\r\n"
+      socket = TCPSocket.open("127.0.0.1","2000")
+      socket.print(request)               # Send request
+      socket.close
+    end
+         
+    def self.flash(msg)
+      request = "{\"text\":\"#{msg}\", \"flash\": \"true\"}\r\n"
+      socket = TCPSocket.open("127.0.0.1","2000")
+      socket.print(request)               # Send request
+      socket.close
+    end
+     def self.clear()
+      request = "{\"command\":\"clear\"}\r\n"
+      socket = TCPSocket.open("127.0.0.1","2000")
+      socket.print(request)               # Send request
+      socket.close
+    end
+    
+  end
+  
   class ConfigReader
     
     class << self
@@ -8,9 +39,9 @@ module HeatController
       def read_config_file
           @config = json_from_file(File.join(APP_ROOT, "config","config.json")) 
           if @config.nil? 
-            #Lcd.mlines("Konfiguration konnte nicht gefunden werden , versuche default Configuration zu laden")          
+            Lcd.mlines("Konfiguration konnte nicht gefunden werden , versuche default Configuration zu laden")          
             sleep(2)
-            @config = json_from_file(File.join(APP_ROOT, "config","config.default.json")) 
+            @config = json_from_file(File.join(APP_ROOT, "config","config..default.json")) 
             if @config.nil?
               Lcd.mlines("Keine Konfiguration gefunden Programm wird gestoppt")
               exit()
@@ -102,12 +133,11 @@ module HeatController
          end
          t.to_f/1000          
       end
-      def read_temperature 
+      def _read_temperature 
         loop do
          t=[]
          ["10-000802c68099", "10-000802bf0598"].each_with_index do |id, i |
-          t[i] = read_sensor_temperatur(id)  
-          config[:sensors]
+           t[i] = read_sensor_temperatur(id)  
           if t[i]<1           
             Lcd.mlines("Achtung Sensor #{i} Ausgefallen")
             sleep(3)
@@ -118,15 +148,29 @@ module HeatController
          end
         end  
       end
-       def get_sensor (s_id)
-        config = ConfigReader.config         
-        config[:sensors].each do |s |
-          return s if s[:id] == s_id
-        end
-      end
       def read_temperature 
-        return {"10-000802c68099" => 20, "10-000802bf0598" => 30 }
-      end      
+        config = ConfigReader.config
+        temp_data={}
+        loop do
+         config[:sensors].each do |s |
+          temp_data[s[:id]] = read_sensor_temperatur(s[:id])  
+          if temp_data[s[:id]]<1           
+            Lcd.mlines("Achtung Sensor #{s[:name]} ist Ausgefallen")
+            sleep(3)
+          else
+            Lcd.sline("S#{s[:name]}:#{sprintf('%.2f',t[i])} C",2)
+          end
+          s[:last_temperature] = temp_data[s[:id]]
+          sleep(1)
+         end
+        end  
+        temp_data
+      end
+      def get_sensor (s_id)
+       config[:sensors].each do |s |
+         return s if s[:id] == s_id
+       end
+      end
       def wait_for_lcd_server
         loop do
           begin 
@@ -146,7 +190,7 @@ module HeatController
           return s[:id] if s[:name] == name
         end
       end
-       def rule_fullfilled ( rule, temp_data )
+      def rule_fullfilled ( rule, temp_data )
         # prepare the conditions 
         and_condition = rule[:and_conditions].map do | condition |
           s_id = sensor_name_to_id(condition[:sensor])
@@ -173,19 +217,17 @@ module HeatController
       
       
       def run
+        wait_for_lcd_server
         ConfigReader.read_config_file
-        #ConfigReader.reload_config if ConfigReader.detect_usb_drive 
+        ConfigReader.reload_config if ConfigReader.detect_usb_drive 
         # main loop
         config = ConfigReader.config
-        puts config        
         loop do         
           temp_data = read_temperature
         # get the rules 
           config[:actuators].each do | actuator |
-            actuator[:rules].each do | rule |
-              result = rule_fullfilled(rule, temp_data)
-              puts " REsult = #{result}"
-              perform_action(actuator, rule[:action]) if result
+            a[:rules].each do | rule |
+              perform_action(actuator, rule[:action]) if rule_fullfilled(rule, temp_data)
             end          
           end
           sleep(5)

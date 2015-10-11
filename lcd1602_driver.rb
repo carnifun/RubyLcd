@@ -12,23 +12,23 @@ module RubyLcd
       Lcd1602Driver
     end
     def print(args)
-      driver.init
+      driver.cls
       driver.print(args)      
     end
     def print_top(message)
-      driver.init
+      driver.cls
       driver.print({text: message, single_line: TOP_ROW})      
     end
     def print_bottom(message)
-      driver.init
+      driver.cls
       driver.print({text: message, single_line: BOTTOM_ROW})      
     end
     def flash(message)      
-      driver.init
+      driver.cls
       driver.print({text: message, flash: true})      
     end
     def clear(args=nil)
-      driver.init
+      driver.cls
       driver.cls()      
     end
   end
@@ -104,7 +104,7 @@ module RubyLcd
           sleep T_MS * 10
           lcdDisplay(ON, OFF, OFF)
           setEntryMode()
-        @@initialized = true
+          @@initialized = true
         end
       end
 

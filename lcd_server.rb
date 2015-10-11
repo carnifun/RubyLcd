@@ -68,7 +68,7 @@ module RubyLcd
        nil
     end
     def self.start
-      RubyLcd.print({text:"Server startet",single_line: "1"})
+      RubyLcd.print({text:"LCD Display ist   Bereit"})
       ip = nil
       5.times do |i|
         ip = get_ip
