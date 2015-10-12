@@ -1,6 +1,34 @@
 module HeatController
+  require "wiringpi"
   APP_ROOT = File.dirname(__FILE__)
   
+  def log(msg)
+    Logger.log(msg)
+  end
+  def log_error(msg)
+    Logger.log_error(msg)
+  end
+  
+  class Logger
+    class << self
+      @@initialized = false        
+      def initialized?
+        @@initialized
+      end
+      def init
+        @@initialized = true
+        @@logger_handler =  File.open(File.join(APP_ROOT, "heat_controll.log"), "w+")         
+      end
+      
+      def log(message)
+        @@logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][INFO ]:#{message}\n")        
+      end
+      def log_error(message)
+        @@logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][ERROR]:#{message}\n")        
+      end
+    end 
+    
+  end
   class Lcd
     require 'socket'
     def self.sline(msg, row = 1 )
@@ -28,10 +56,55 @@ module HeatController
       socket = TCPSocket.open("127.0.0.1","2000")
       socket.print(request)               # Send request
       socket.close
+    end    
+  end
+  class RelaisCard
+    # Wiring pins 
+    # model B+ 
+    # CHANNES ar numbered from 1 to 4 
+    CHANNES = [ 3, 12, 13, 14 ]
+    # model A+ 
+    #CHANNES = [-1,  21 , 22, 23, 24 ]
+    @@initialized = false
+    HIGH = 1 
+    LOW = 1     
+    class << self
+      
+      def initialized?
+        @@initialized
+      end
+      def init
+        @@initialized = true
+        CHANNES.each do | c |
+          Wiringpi.pinMode(c, 1)
+        end
+      end  
+      def get_state(actuator)
+        Wiringpi.digitalRead(actuator[:channel].to_i + 1)        
+      end    
+      def action (channel, a)
+        return if channel.nil? or channel.empty?
+        channel = channel.to_i  + 1 
+        return if  channel >3 or channel < 0 
+        pin = CHANNES[channel]
+        old_state = Wiringpi.digitalRead (pin)
+        new_state = (a=="on") ? HIGH : LOW
+        if old_state != new_state
+          Wiringpi.digitalWrite(pin, new_state)
+          log("Kanal #{channel}  wurde auf #{a} gesetzt" )
+          true
+        end  
+        false
+      end
+      def on(channel) 
+        action(channel, "on")
+      end
+      def off(channel) 
+        action(channel, "off")
+      end      
     end
     
   end
-  
   class ConfigReader
     
     class << self
@@ -120,10 +193,9 @@ module HeatController
     end  
   end
 
-
   class MainController
     class << self
-      
+      @sensor_data={}
       
       def read_sensor_temperatur(sensor_id)       
          content = File.read("/sys/bus/w1/devices/#{sensor_id}/w1_slave") 
@@ -133,38 +205,34 @@ module HeatController
          end
          t.to_f/1000          
       end
-      def _read_temperature 
-        loop do
-         t=[]
-         ["10-000802c68099", "10-000802bf0598"].each_with_index do |id, i |
-           t[i] = read_sensor_temperatur(id)  
-          if t[i]<1           
-            Lcd.mlines("Achtung Sensor #{i} Ausgefallen")
-            sleep(3)
-          else
-            Lcd.sline("S#{i}:#{sprintf('%.2f',t[i])} C",2)
-          end 
-          sleep(1)
-         end
-        end  
-      end
-      def read_temperature 
+      def update_status_line
         config = ConfigReader.config
-        temp_data={}
-        loop do
-         config[:sensors].each do |s |
-          temp_data[s[:id]] = read_sensor_temperatur(s[:id])  
-          if temp_data[s[:id]]<1           
+        status =" " 
+        config[:sensors].each do | s |
+          status +="#{s[:name]}:#{@sensor_data[s[:id]]} "
+        end
+        
+        config[:actuators].each do | actuator |
+          state = RelaisCard.get_state(actuator)
+          status +="#{actuator[:name]}:#{state==1?"An":"Aus"} "
+        end
+        
+      end
+      
+      def read_temperature
+        config = ConfigReader.config
+        @sensor_data={}
+        config[:sensors].each do |s |
+          @sensor_data[s[:id]] = read_sensor_temperatur(s[:id])
+          if @sensor_data[s[:id]]<1
             Lcd.mlines("Achtung Sensor #{s[:name]} ist Ausgefallen")
             sleep(3)
           else
             Lcd.sline("S#{s[:name]}:#{sprintf('%.2f',t[i])} C",2)
+            sleep(1)
           end
-          s[:last_temperature] = temp_data[s[:id]]
-          sleep(1)
-         end
-        end  
-        temp_data
+          s[:last_temperature] = @sensor_data[s[:id]]
+        end
       end
       def get_sensor (s_id)
        config[:sensors].each do |s |
@@ -174,8 +242,7 @@ module HeatController
       def wait_for_lcd_server
         loop do
           begin 
-            Lcd.sline("Bitte warten",1)
-            Lcd.sline("Server wird gestartet", 2)
+            Lcd.mlines("Server wird gestartet", 2)
             sleep(2)
             return true
           rescue
@@ -190,44 +257,86 @@ module HeatController
           return s[:id] if s[:name] == name
         end
       end
-      def rule_fullfilled ( rule, temp_data )
-        # prepare the conditions 
-        and_condition = rule[:and_conditions].map do | condition |
+      
+      def compose_condition_from_rule (rule, und= true)        
+        rule_conditions = _und ?  rule[:and_conditions] : rule[:or_conditions]        
+        rule_conditions.map do | condition |
           s_id = sensor_name_to_id(condition[:sensor])
-          s = get_sensor(s_id)
-          variation = condition[:tolerance]
-          variation = (temp_data[s_id] - s[:last_temperature]).abs unless s[:last_temperature].nil? 
-          " ( #{temp_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f ) and ( #{variation} >= #{condition[:tolerance]} ) "
-        end.join(" and ") if rule[:and_conditions]
+          variation_condition = if condition[:tolerance]
+            variation = condition[:tolerance]            
+            if rule[:last_temperature] && rule[:last_temperature][s_id]
+              variation = (@sensor_data[s_id] - rule[:last_temperature][s_id]).abs 
+              "  #{variation} >= #{condition[:tolerance]}  "
+            else
+              nil
+            end  
+          end 
+          c = [" #{@sensor_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f  ", 
+            variation_condition].compact.join(" and ")
+            
+          "( #{c} )"  
+        end.join( _und ?  " and " : " or ") if rule_conditions
+                
         
-        or_condition = rule[:or_conditions].map do | condition |
+        
+      end
+      
+      def save_rule_temperature (rule)
+        (rule[:and_conditions] + rule[:or_conditions]).each do | condition |
           s_id = sensor_name_to_id(condition[:sensor])
-          " ( #{temp_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f ) "
-        end.join(" OR ") if rule[:or_conditions]        
-        condition = [and_condition, or_condition].compact.join(" or ") 
+          rule[:last_temperature] = {} if rule[:last_temperature].nil?          
+          rule[:last_temperature][s_id] = @sensor_data[s_id] 
+        end
+        true
+      end
+      
+      def rule_fullfilled ( rule )
+        # prepare the conditions 
+        and_condition = compose_condition_from_rule(rule[:and_conditions]) 
+        or_condition = compose_condition_from_rule(rule[:or_conditions]) 
+        
+
+        rule_condition = [and_condition, or_condition].compact.join(" or ") 
         puts " MEIN CONDITON "
         puts condition
         sleep(1)
-        eval " (#{condition}) ? true : false "
+        if (eval " (#{condition}) ? true : false ")
+          # save rule temperature
+          save_rule_temperature
+          return true                    
+        end
+        false        
       end
       
       def perform_action (actuator, action)
-        
+        excecuted = RelaisCard.send(action, actuator[:channel])
+        if excecuted
+          Lcd.sline("#{actuator[:name]} = #{action}")
+        end
+        update_status_line
       end
+
       
-      
-      def run
+
+      def init
+        # wait for lcd server to go up
+        Logger.init
         wait_for_lcd_server
         ConfigReader.read_config_file
-        ConfigReader.reload_config if ConfigReader.detect_usb_drive 
+        ConfigReader.reload_config if ConfigReader.detect_usb_drive         
+        Wiringpi.wiringPiSetup
+        RelaisCard.init        
+      end      
+      
+      def run
         # main loop
         config = ConfigReader.config
-        loop do         
-          temp_data = read_temperature
+        loop do
+          read_temperature
         # get the rules 
           config[:actuators].each do | actuator |
             a[:rules].each do | rule |
-              perform_action(actuator, rule[:action]) if rule_fullfilled(rule, temp_data)
+              perform_action(actuator, rule[:action]) if rule_fullfilled(rule)
             end          
           end
           sleep(5)

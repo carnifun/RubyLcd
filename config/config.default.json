@@ -14,7 +14,7 @@
   "actuators" :[
     {
       "name":"pumpe-1",
-      "chanel":"1",
+      "channel":"1",
       "rules":[
         {
           "action":"on",
