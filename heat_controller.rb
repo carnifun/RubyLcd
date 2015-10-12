@@ -230,7 +230,7 @@ module HeatController
             Lcd.mlines("Achtung Sensor #{s[:name]} ist Ausgefallen")
             sleep(3)
           else
-            Lcd.sline("S#{s[:name]}:#{sprintf('%.2f',t[i])} C",2)
+            Lcd.sline("S#{s[:name]}:#{sprintf('%.2f',@sensor_data[s[:id]])} C",2)
             sleep(1)
           end
         end
