@@ -1,14 +1,14 @@
 module HeatController
   require "wiringpi"
   APP_ROOT = File.dirname(__FILE__)
-  
+  class << self
   def log(msg)
     Logger.log(msg)
   end
   def log_error(msg)
     Logger.log_error(msg)
   end
-  
+  end
   class Logger
     class << self
       @@initialized = false        
@@ -67,7 +67,7 @@ module HeatController
     #CHANNES = [-1,  21 , 22, 23, 24 ]
     @@initialized = false
     HIGH = 1 
-    LOW = 1     
+    LOW = 0    
     class << self
       
       def initialized?
@@ -85,12 +85,12 @@ module HeatController
       def action (channel, a)
         return if channel.nil? or channel.empty?
         channel = channel.to_i  + 1 
-        return if  channel >3 or channel < 0 
+        return if  channel > 4 or channel < 1 
         pin = CHANNES[channel]
         old_state = Wiringpi.digitalRead(pin)
-        new_state = (a=="on") ? HIGH : LOW
-        puts "action #{a} old_state#{old_state} new_state#{new_state} -- "
-        if old_state != new_state
+        new_state = (a=="on") ? LOW : HIGH
+        if old_state.to_i != new_state.to_i
+          puts "action #{a} old_state#{old_state} new_state#{new_state} -- "
           Wiringpi.digitalWrite(pin, new_state)
           HeatController.log("Kanal #{channel}  wurde auf #{a} gesetzt" )
           true
@@ -217,7 +217,7 @@ module HeatController
         
         config[:actuators].each do | actuator |
           state = RelaisCard.get_state(actuator)
-          status +="#{actuator[:name]}:#{state==1?"An":"Aus"} "
+          status +="#{actuator[:name]}:#{state==1?"Aus":"An"} "
         end
         Lcd.sline(status, 1)
       end
