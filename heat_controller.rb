@@ -77,6 +77,7 @@ module HeatController
         @@initialized = true
         CHANNES.each do | c |
           Wiringpi.pinMode(c, 1)
+          Wiringpi.digitalWrite(c, HIGH)
         end
       end  
       def get_state(actuator)
@@ -84,8 +85,8 @@ module HeatController
       end    
       def action (channel, a)
         return if channel.nil? or channel.empty?
-        channel = channel.to_i  + 1 
-        return if  channel > 4 or channel < 1 
+        channel = channel.to_i  - 1 
+        return if  channel > 3 or channel < 0 
         pin = CHANNES[channel]
         old_state = Wiringpi.digitalRead(pin)
         new_state = (a=="on") ? LOW : HIGH
