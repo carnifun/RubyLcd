@@ -330,6 +330,7 @@ module HeatController
       
       def run
         # main loop
+        init
         config = ConfigReader.config
         loop do
           read_temperature
