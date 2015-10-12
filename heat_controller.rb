@@ -87,11 +87,12 @@ module HeatController
         channel = channel.to_i  + 1 
         return if  channel >3 or channel < 0 
         pin = CHANNES[channel]
-        old_state = Wiringpi.digitalRead (pin)
+        old_state = Wiringpi.digitalRead(pin)
         new_state = (a=="on") ? HIGH : LOW
+        puts "action #{a} old_state#{old_state} new_state#{new_state} -- "
         if old_state != new_state
           Wiringpi.digitalWrite(pin, new_state)
-          HeatControll.log("Kanal #{channel}  wurde auf #{a} gesetzt" )
+          HeatController.log("Kanal #{channel}  wurde auf #{a} gesetzt" )
           true
         end  
         false
@@ -218,7 +219,7 @@ module HeatController
           state = RelaisCard.get_state(actuator)
           status +="#{actuator[:name]}:#{state==1?"An":"Aus"} "
         end
-        
+        Lcd.sline(status, 1)
       end
       
       def read_temperature
@@ -264,32 +265,13 @@ module HeatController
         rule_conditions = und ?  rule[:and_conditions] : rule[:or_conditions]        
         rule_conditions.map do | condition |
           s_id = sensor_name_to_id(condition[:sensor])
-          variation_condition = if condition[:tolerance]
-            variation = condition[:tolerance]            
-            if rule[:last_temperature] && rule[:last_temperature][s_id]>0
-              variation = (@sensor_data[s_id] - rule[:last_temperature][s_id]).abs 
-              "  #{variation} >= #{condition[:tolerance]}  "
-            else
-              nil
-            end  
-          end 
-          c = (@sensor_data[s_id]>0) ? [" #{@sensor_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f  ", 
-            variation_condition].compact.join(" and ") : " false "
-            
-          "( #{c} )"  
+        
+          c = (@sensor_data[s_id]>0) ? " #{@sensor_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f  " : " false "            
+          "( #{c} )"
         end.join(und ?  " and " : " or ") if rule_conditions
       end
       
-      def save_rule_temperature (rule)
-        cond = rule[:and_conditions] if  !rule[:and_conditions].nil? and !rule[:and_conditions].empty?         
-        cond = rule[:or_conditions] if  !rule[:or_conditions].nil? and !rule[:and_conditions].empty?         
-        cond.each do | condition |
-          s_id = sensor_name_to_id(condition[:sensor])
-          rule[:last_temperature] = {} if rule[:last_temperature].nil?          
-          rule[:last_temperature][s_id] = @sensor_data[s_id] 
-        end
-        true
-      end
+      
       
       def rule_fullfilled ( rule )
         # prepare the conditions 
@@ -302,17 +284,21 @@ module HeatController
         puts rule_condition
         sleep(1)
         if (eval " (#{rule_condition}) ? true : false ")
+          puts "Condition ist OKAY "
           # save rule temperature
-          save_rule_temperature(rule)
           return true                    
         end
         false        
       end
       
       def perform_action (actuator, action)
+        puts "performing action#{action}"
         excecuted = RelaisCard.send(action, actuator[:channel])
         if excecuted
           Lcd.sline("#{actuator[:name]} = #{action}")
+          puts "action#{action} executed "
+          
+          sleep(1)
         end
         update_status_line
       end

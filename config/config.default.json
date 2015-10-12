@@ -23,14 +23,7 @@
             {
               "sensor":"s1",
               "comparator":">",
-              "value"     : "50",
-              "tolerance" : "5"
-            },
-            {
-              "sensor":"s2",
-              "comparator":">",
-              "value"     : "60",
-              "tolerance" : "5"
+              "value"     : "25"
             }
           ]
         },
@@ -40,8 +33,7 @@
             {
               "sensor":"s1",
               "comparator":"<",
-              "value"     : "45",
-              "tolerance" : "5"
+              "value"     : "25"
             }
           ]
         }
