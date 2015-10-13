@@ -88,7 +88,7 @@ module RubyLcd
       loop {
         @threads << Thread.start(server.accept) do |client|
             message = client.gets
-            puts "server got message #{message} "
+            #puts "server got message #{message} "
             if !message.nil?
               r = Request.new(message)
               r.run unless r.nil?

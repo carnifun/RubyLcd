@@ -220,9 +220,9 @@ module RubyLcd
         # Loop through each character in the string, convert it to binary, and print it to the LCD
         
         lines = string.scan(/.{1,40}/)
-        puts "Buffer "
-        puts lines.inspect
-        puts "Buffer "
+        #puts "Buffer "
+        #puts lines.inspect
+        #puts "Buffer "
         lines.each do | l | 
           l.each_byte do | b |
               write_char(b.to_s(2))
