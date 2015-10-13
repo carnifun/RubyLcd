@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 load  File.join(File.dirname(__FILE__), 'lcd1602_driver.rb')
 
 module RubyLcd
