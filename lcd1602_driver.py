@@ -131,7 +131,7 @@ module RubyLcd
       
 
           
-     def initialize ()
+    def initialize ()
 
       Wiringpi.wiringPiSetup
 
@@ -170,81 +170,102 @@ module RubyLcd
         delayMicroseconds(3000)  # 3000 microsecond sleep, clearing the display takes a long time
     end  
 
-    def setCursor (col, row)
+    def setCursor(self, col, row):
         row_offsets = [0x00, 0x40, 0x14, 0x54]
-        numlines = 2
-        row = numlines - 1  if row > numlines # we count rows starting w/0
+        if row > numlines:
+            row = numlines - 1  # we count rows starting w/0
         commands(LCD_SETDDRAMADDR | (col + row_offsets[row]))
-    end
+
     def noDisplay
-        #""" Turn the display off (quickly) """
-        @displaycontrol &= ~LCD_DISPLAYON
-        commands(LCD_displaycontrol | @displaycontrol)
-    end
+        """ Turn the display off (quickly) """
+        displaycontrol &= ~LCD_DISPLAYON
+        commands(LCD_DISPLAYCONTROL | displaycontrol)
+
     def display
-        #""" Turn the display on (quickly) """
-        @displaycontrol|= LCD_DISPLAYON
-        commands(LCD_DISPLAYCONTROL | @displaycontrol)
-    end
+        """ Turn the display on (quickly) """
+        displaycontrol |= LCD_DISPLAYON
+        commands(LCD_DISPLAYCONTROL | displaycontrol)
+
     def noCursor
-       # """ Turns the underline cursor off """
-        @displaycontrol &= ~LCD_CURSORON
-        commands(LCD_DISPLAYCONTROL | @displaycontrol)
-    end
+        """ Turns the underline cursor off """
+        displaycontrol &= ~LCD_CURSORON
+        commands(LCD_DISPLAYCONTROL | displaycontrol)
+
     def cursor
-        #""" Turns the underline cursor on """
-        @displaycontrol |= LCD_CURSORON
-        commands(LCD_DISPLAYCONTROL | @displaycontrol)
-    end
-    
+        """ Turns the underline cursor on """
+        displaycontrol |= LCD_CURSORON
+        commands(LCD_DISPLAYCONTROL | displaycontrol)
+
     def noBlink
-        #""" Turn the blinking cursor off """
-        @displaycontrol &= ~LCD_BLINKON
-        commands(LCD_DISPLAYCONTROL | @displaycontrol)
-    end
+        """ Turn the blinking cursor off """
+        displaycontrol &= ~LCD_BLINKON
+        commands(LCD_DISPLAYCONTROL | displaycontrol)
+
     def blink
-        #""" Turn the blinking cursor on """
-        @displaycontrol |= LCD_BLINKON
-        commands(LCD_DISPLAYCONTROL | @displaycontrol)
-    end
+        """ Turn the blinking cursor on """
+        displaycontrol |= LCD_BLINKON
+        commands(LCD_DISPLAYCONTROL | displaycontrol)
+
     def DisplayLeft
-        #""" These commands scroll the display without changing the RAM """
+        """ These commands scroll the display without changing the RAM """
         commands(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT)
-    end
+
     def scrollDisplayRight
-        #""" These commands scroll the display without changing the RAM """
+        """ These commands scroll the display without changing the RAM """
         commands(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT)
-    end
+
     def leftToRight
-        #""" This is for text that flows Left to Right """
+        """ This is for text that flows Left to Right """
         displaymode |= LCD_ENTRYLEFT
         commands(LCD_ENTRYMODESET | displaymode)
-    end
+
     def rightToLeft
-        #""" This is for text that flows Right to Left """
+        """ This is for text that flows Right to Left """
         displaymode &= ~LCD_ENTRYLEFT
         commands(LCD_ENTRYMODESET | displaymode)
-    end
+
     def autoscroll
-        #""" This will 'right justify' text from the cursor """
+        """ This will 'right justify' text from the cursor """
         displaymode |= LCD_ENTRYSHIFTINCREMENT
         commands(LCD_ENTRYMODESET | displaymode)
-    end
+
     def noAutoscroll
-        #""" This will 'left justify' text from the cursor """
+        """ This will 'left justify' text from the cursor """
         displaymode &= ~LCD_ENTRYSHIFTINCREMENT
         commands(LCD_ENTRYMODESET | displaymode)
-    end
 
 
 
+    def delayMicroseconds(self, microseconds):
+        seconds = microseconds / float(1000000)  # divide microseconds by 1 million for seconds
+        sleep(seconds)
 
 
-    def message(text)
-      #commands(0xC0)  # next line                
-      text.each_byte do | b |
-        write_char(b.to_s(2))
-      end                        
-    end                
-  end
-end
+
+    def message(self, text):
+        """ Send string to LCD. Newline wraps to second line"""
+        for char in text:
+            if char == 'n':
+                commands(0xC0)  # next line
+            else:
+                write_chars(ord(char))
+
+
+if __name__ == '__main__':
+    lcd = Adafruit_CharLCD()  
+  cmd = "ip addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1"
+
+  lcd.begin(16, 1)
+
+
+  def run_cmd(cmd):
+    p = Popen(cmd, shell=True, stdout=PIPE)
+    output = p.communicate()[0]
+    return output
+
+  while 1:
+    lcd.clear()
+    ipaddr = run_cmd(cmd)
+    lcd.message(datetime.now().strftime('%b %d  %H:%M:%Sn'))
+    lcd.message('IP %s' % (ipaddr))
+    sleep(2)
