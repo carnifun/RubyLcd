@@ -1,11 +1,6 @@
 {
   "sensors": [
     {
-      "name":"s1",
-      "description":"Sensor an der Therme 1 ",
-      "id" : "10-000802c68099"
-    },
-    {
       "name":"s2",
       "description":"Sensor am uv-pumpe 2 ",
       "id" : "10-000802bf0598"
@@ -13,7 +8,7 @@
   ],
   "actuators" :[
     {
-      "name":"pumpe-1",
+      "name":"UWP-1",
       "channel":"1",
       "rules":[
         {
@@ -21,7 +16,7 @@
           "and_conditions":
           [
             {
-              "sensor":"s1",
+              "sensor":"s2",
               "comparator":">",
               "value"     : "25"
             }
@@ -31,7 +26,7 @@
           "action":"off",
           "and_conditions":[
             {
-              "sensor":"s1",
+              "sensor":"s2",
               "comparator":"<",
               "value"     : "25"
             }
