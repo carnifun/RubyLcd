@@ -132,18 +132,15 @@ module HeatController
         if old_state.to_i != new_state.to_i
           Wiringpi.digitalWrite(pin, new_state)
           HeatController.log("Kanal #{channel}  wurde auf #{a} gesetzt" )
-          true
-        end  
+          return true
+        end
         false
       end
       def on(channel) 
-        [1,2,3,4].each do |  c | 
-          action(c.to_s, "on")
-        end
-        #action(channel, "on")
+        action(channel, "on")
       end
-      def off(channel) 
-        action(channel, "off")
+      def off(channel)
+        action(channel, "off")        
       end      
     end
     
@@ -239,6 +236,15 @@ module HeatController
     class << self
       @sensor_data={}
       
+      
+      def fallback_programm
+        config = ConfigReader.config
+        config[:actuators].each do | actuator |
+          executed = RelaisCard.send(actuator[:fallback_state], actuator[:channel])
+          Lcd.sline("#{actuator[:name]}=>#{actuator[:fallback_state]=="on"? "An": "Aus"}")
+          sleep(3)
+        end
+      end
       def read_sensor_temperatur(sensor_id)       
         sfile = "/sys/bus/w1/devices/#{sensor_id}/w1_slave"
         return 0 unless File.exists?(sfile)       
@@ -251,7 +257,7 @@ module HeatController
       end
       def update_status
         config = ConfigReader.config
-        status =" " 
+        status ="" 
         config[:sensors].each do | s |
           status +="#{s[:name]}:#{@sensor_data[s[:id]].to_i} C".to_16          
         end
@@ -332,9 +338,10 @@ module HeatController
         #puts "performing action#{action}"
         excecuted = RelaisCard.send(action, actuator[:channel])
         if excecuted
-          Lcd.sline("#{actuator[:name]} = #{action}")
-          puts "action#{action} executed "          
-          sleep(1)
+          Led.action
+          Lcd.sline("#{actuator[:name]}=>#{action=="on"? "An": "Aus"}")
+          puts "action#{action} executed "
+          sleep(3)
         end
       end
       def init
@@ -363,7 +370,10 @@ module HeatController
           else
             Led.error
             #wait for error message to be shown 
-            sleep(5)  
+            sleep(5)
+            Lcd.sline("Notlauf Progr.", 2)
+            fallback_programm
+            sleep(5)
           end
           update_status
           sleep(MAIN_LOOP_INTERVALL)

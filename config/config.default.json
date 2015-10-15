@@ -10,6 +10,7 @@
     {
       "name":"UWP-1",
       "channel":"1",
+      "fallback_state":"on",
       "rules":[
         {
           "action":"on",
@@ -33,6 +34,35 @@
           ]
         }
         
+      ]
+      
+    },
+    {
+      "name":"umschalter",
+      "channel":"2",
+	  "fallback_state":"off",      
+      "rules":[
+        {
+          "action":"off",
+          "and_conditions":
+          [
+            {
+              "sensor":"s2",
+              "comparator":"<",
+              "value"     : "22"
+            }
+          ]
+        },
+        {
+          "action":"on",
+          "and_conditions":[
+            {
+              "sensor":"s2",
+              "comparator":">",
+              "value"     : "25"
+            }
+          ]
+        }        
       ]
       
     }

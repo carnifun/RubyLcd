@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 module RubyLed
-  DEFAULT_LOOP_COUNT = 30 # ca 30 sekunden
+  DEFAULT_LOOP_COUNT = 60 # ca 30 sekunden
   ON = 0
   OFF = 1
   class Led 
