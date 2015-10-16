@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 class String
       def to_16
         self + " " * (16 - size)
@@ -120,15 +121,15 @@ module HeatController
         Wiringpi.digitalRead(pin)        
       end    
       def action (channel, a)
-        puts "channel #{channel} action #{a}"
+        #puts "channel #{channel} action #{a}"
         return if channel.nil? or channel.empty?
         channel = channel.to_i  - 1 
         return if  channel > 3 or channel < 0 
         pin = CHANNELS[channel]
-        puts "Pin #{pin}"
+        #puts "Pin #{pin}"
         old_state = Wiringpi.digitalRead(pin)
         new_state = (a=="on") ? LOW : HIGH
-        puts "action #{a} old_state#{old_state} new_state#{new_state} -- "
+        #puts "action #{a} old_state#{old_state} new_state#{new_state} -- "
         if old_state.to_i != new_state.to_i
           Wiringpi.digitalWrite(pin, new_state)
           HeatController.log("Kanal #{channel}  wurde auf #{a} gesetzt" )
@@ -207,7 +208,7 @@ module HeatController
          end
          
          if File.exists?(usb_path)
-           puts "dir found "
+           #puts "dir found "
            Lcd.mlines("Usb erkannt")
            sleep(1)         
            system("unmount /media/usb")
@@ -264,7 +265,7 @@ module HeatController
         
         config[:actuators].each do | actuator |
           state = RelaisCard.get_state(actuator)
-          puts "state #{state} == 1 "
+          #puts "state #{state} == 1 "
           status +="#{actuator[:name]}:#{state==1?"Aus":"An"}".to_16
         end
         Lcd.mlines(status)
@@ -295,7 +296,7 @@ module HeatController
             sleep(2)
             return true
           rescue
-            puts "waiting for lcd server"  			
+            #puts "waiting for lcd server"  			
             sleep(5)
           end  
         end  
@@ -324,11 +325,11 @@ module HeatController
         
 
         rule_condition = [and_condition, or_condition].compact.join(" or ") 
-        puts " MEIN CONDITON "
-        puts rule_condition
+        #puts " MEIN CONDITON "
+        #puts rule_condition
         #sleep(1)
         if (eval " (#{rule_condition}) ? true : false ")
-          puts "Condition ist OKAY "
+          #puts "Condition ist OKAY "
           # save rule temperature
           return true                    
         end
@@ -340,7 +341,7 @@ module HeatController
         if excecuted
           Led.action
           Lcd.sline("#{actuator[:name]}=>#{action=="on"? "An": "Aus"}")
-          puts "action#{action} executed "
+          #puts "action#{action} executed "
           sleep(3)
         end
       end
