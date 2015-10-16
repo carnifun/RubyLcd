@@ -10,9 +10,6 @@ module RubyLed
       P_RED = 0 # GPIO 17 / pin 11
       P_BLUE = 2 # GPIO 27 / PIN 13 
       P_GREEN = 3 # GPIO 22 / PIN 15
-      
-
-      
       def init
         Wiringpi.wiringPiSetup
         [P_RED, P_BLUE, P_GREEN].each do | pin |
@@ -60,20 +57,30 @@ module RubyLed
           sleep(p2)
           loop_count -= 1 if loop_count >0 
           break if loop_count == 0
-          break if @stopped
         end
+        
       end
+   
+      # okay ==> warning ==> error 3 *  DEFAULT_LOOP_COUNT 
+      # action => okay ==> warning ==> error  4 * DEFAULT_LOOP_COUNT
       def error (params=nil)        
         blink(P_RED, 0.2, 0.2, params)
+
       end      
       def okay (params=nil)
-        blink(P_GREEN, 0.8, 0.45, params)        
+        blink(P_GREEN, 0.8, 0.45, params)
+        # we should not be here and if
+        warning(params) 
       end      
       def action (params=nil)        
-        blink(P_BLUE, 0.25, 0.25, params)        
+        blink(P_BLUE, 0.25, 0.25, params)
+        # we should not be here and if
+        okay(params)                
       end      
       def warning (params=nil)                
-        blink([P_RED, P_GREEN], 0.25, 0.25, params)        
+        blink([P_RED, P_GREEN], 0.25, 0.25, params)
+        # we should not be here and if
+        error(params)
       end      
       def funny (params=nil)                
         blink([P_BLUE, P_GREEN], 0.25, 0.25, params)        
@@ -91,12 +98,8 @@ module RubyLed
         JSON.parse(message,{:symbolize_names => true})
       rescue
         nil
-      end
-      
+      end      
     end
-    
-    
-    
     def run
       return if @object.nil?
       Server.kill_others()
@@ -105,7 +108,6 @@ module RubyLed
       end
     end
   end
-
   class Server
     require 'socket'
     require 'thread'
@@ -142,5 +144,6 @@ module RubyLed
     end
   end
 end
+
 
 RubyLed::Server.start

@@ -1,0 +1,6 @@
+test2.rb:5:in `sleep': Interrupt
+	from test2.rb:5:in `block in <main>'
+	from test2.rb:2:in `loop'
+	from test2.rb:2:in `<main>'
+ info 0
+ info 1
