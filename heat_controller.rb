@@ -172,6 +172,9 @@ module HeatController
       def reload_config
         require 'digest/md5'      
         content = File.read("/media/usb/config.json")
+ 	#content = File.read("/heatcontroll/config/config.test")
+
+
         md5 = Digest::MD5.hexdigest(content)
         if File.exists?(File.join(APP_ROOT, "config",md5))       
           Lcd.mlines("Konfiguration ist breits aktuell")
@@ -346,7 +349,7 @@ module HeatController
         # wait for lcd server to go up
         wait_for_lcd_server
         ConfigReader.read_config_file
-        ConfigReader.reload_config if ConfigReader.detect_usb_drive         
+        ConfigReader.reload_config  if ConfigReader.detect_usb_drive         
         Wiringpi.wiringPiSetup
         RelaisCard.init       
       end      
