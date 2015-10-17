@@ -130,11 +130,16 @@ module HeatController
     class << self
       @config = nil            
       def read_config_file
+          puts "-------------------3"
           @config = json_from_file(File.join(APP_ROOT, "config","config.json")) 
+          puts "-------------------4"
           if @config.nil? 
-            Lcd.mlines("lade default".to_16 + "Configuration")          
-            sleep(5)
-            @config = json_from_file(File.join(APP_ROOT, "config","config.default.json")) 
+            #Lcd.mlines("lade default".to_16 + "Configuration")          
+            #sleep(5)
+          puts "-------------------5"
+            @config = json_from_file(File.join(APP_ROOT, "config","config.default.json"))
+            puts File.join(APP_ROOT, "config","config.default.json") 
+          puts "-------------------6"
             if @config.nil?
               Lcd.mlines("Keine Konfiguration".to_16+  "gefunden. exit")
               Led.fatal_error
@@ -218,8 +223,10 @@ module HeatController
       
       
       def fallback_programm
-        debugger
-        config = ConfigReader.config        
+        puts "-------------------1"
+        config = ConfigReader.read_config_file
+        puts "-------------------2"
+        
         config[:actuators].each do | actuator |
           log " fallback #{actuator}"
           RelaisCard.send(actuator[:fallback_state], actuator[:channel])
