@@ -50,6 +50,7 @@ module HeatController
         socket = TCPSocket.open("127.0.0.1","2000") 
         socket.print(request)               # Send request
         socket.close
+        true
        rescue
          return false
        end
@@ -134,8 +135,8 @@ module HeatController
         int_file = "/etc/network/interfaces"
         int_file = "/home/pi/interfaces"
         content = File.read(int_file) 
-        content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
-        content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
+        content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
+        content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
         f = File.open(int_file, "w+")
         f.puts content
         f.close
@@ -152,8 +153,8 @@ module HeatController
               exit()
             end
           end
-          if new_file
-            #update_network_setting            
+          if new_file            
+            update_network_setting            
           end
         end
       def json_from_file ( file )
@@ -288,14 +289,14 @@ module HeatController
       def wait_for_lcd_server
         loop do
           begin 
-            Lcd.sline("Lcd server up")
-            sleep(2)
-            return true
+            s = Lcd.sline("Lcd server up")
+            sleep(1)
+            return true if s 
           rescue
             #puts "waiting for lcd server"  			
-            sleep(5)
-          end  
-        end  
+            sleep(1)
+          end
+        end
       end
       def sensor_name_to_id (name) 
         config = ConfigReader.config
