@@ -16,7 +16,7 @@ def is_running? (proc)
 end
 
 
-def stop (proc)
+def stop (proc, wait=false)
   # kill
   term = 15
   # terminate
@@ -27,7 +27,7 @@ def stop (proc)
     10.times do | i |   
       puts " wating for process to finish #{i}"
       sleep(1)
-    end 
+    end if wait
     # wait the process to go fallback
     `kill -#{kill} #{pid} ` 
     puts "#{proc} gestoppt "
@@ -58,6 +58,6 @@ if command == "start"
 elsif command =="stop" 
   stop("lcd_server.rb")   
   stop("led_server.rb")   
-  stop("heat_controller.rb")      
+  stop("heat_controller.rb", true)      
 end
 
