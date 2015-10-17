@@ -1,5 +1,9 @@
 #!/usr/bin/ruby
-load  File.join(File.dirname(__FILE__), 'lcd1602_driver.rb')
+
+APP_ROOT = "/heatcontroll"
+load "#{APP_ROOT}/logger.rb"
+load "#{APP_ROOT}/lcd1602_driver.rb"
+
 
 module RubyLcd
   class Request    
@@ -69,12 +73,14 @@ module RubyLcd
        nil
     end
     def self.start
+      log("Lcd Server gestartet")
       RubyLcd.print({text:"LCD Display ist   Bereit"})
       ip = nil
       5.times do |i|
         ip = get_ip
         if (ip)
           RubyLcd.print({text:"IP:             #{ip}"})
+          log("Netzwerk IP:#{ip}")
         else
           RubyLcd.print({text:"Warte auf       Netzwerk#{ '.' * (i+1) }"})
         end
@@ -101,4 +107,19 @@ module RubyLcd
   end
 end
 
+
+Signal.trap('INT') do|_signo|
+  RubyLcd.clear
+  exit(0)
+end
+Signal.trap('KILL') do|_signo|
+  RubyLcd.clear
+  exit(0)
+end
+
+Signal.trap('TERM') do|_signo|
+  RubyLcd.clear
+  exit(0)
+end
 RubyLcd::Server.start
+

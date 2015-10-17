@@ -1,54 +1,32 @@
 #!/usr/bin/ruby
-class String
-      def to_16
-        self + " " * (16 - size)
-      end
-  end
 
-module HeatController
-  
+class String
+  def to_16
+    self + " " * (16 - size)
+  end
+end
+
+APP_ROOT = "/heatcontroll"
+load "#{APP_ROOT}/logger.rb"
+
+module HeatController  
   require "wiringpi"
-  APP_ROOT = File.dirname(__FILE__)
   HIGH = 1 
   LOW = 0    
   T_MS = 1.0000000/1000000
   MAIN_LOOP_INTERVALL = 10
-  class << self
-  def log(msg)
-    Logger.log(msg)
-  end
-  def log_error(msg)
-    Logger.log_error(msg)
-  end
-  end
-  
-  class Logger
-    class << self
-      @@initialized = false        
-      def initialized?
-        @@initialized
-      end
-      def init
-        @@initialized = true
-        @@logger_handler =  File.open(File.join(APP_ROOT, "heat_controll.log"), "w+")         
-      end
-      
-      def log(message)
-        @@logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][INFO ]:#{message}\n")        
-      end
-      def log_error(message)
-        @@logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][ERROR]:#{message}\n")        
-      end
-    end 
-    
-  end
   
   class Led
     require 'socket'
     def self.tcp_send request 
-      socket = TCPSocket.open("127.0.0.1","2010") 
-      socket.print(request)               # Send request
-      socket.close
+      begin
+        socket = TCPSocket.open("127.0.0.1","2010") 
+        socket.print(request)               # Send request
+        socket.close
+        true      
+      rescue
+        false
+      end
     end
     
     
@@ -66,31 +44,31 @@ module HeatController
   
   class Lcd
     require 'socket'
+    
+    def self.tcp_send request 
+      begin 
+        socket = TCPSocket.open("127.0.0.1","2000") 
+        socket.print(request)               # Send request
+        socket.close
+       rescue
+         return false
+       end
+    end
+    
+    
     def self.sline(msg, row = 1 )
-      request = "{\"text\":\"#{msg}\", \"single_line\":\"#{row}\" }\r\n"
-      socket = TCPSocket.open("127.0.0.1","2000")
-      socket.print(request)               # Send request
-      socket.close
+        tcp_send  "{\"text\":\"#{msg}\", \"single_line\":\"#{row}\" }\r\n"
     end
     
     def self.mlines(msg)
-      request = "{\"text\":\"#{msg}\"}\r\n"
-      socket = TCPSocket.open("127.0.0.1","2000")
-      socket.print(request)               # Send request
-      socket.close
+      tcp_send "{\"text\":\"#{msg}\"}\r\n"
     end
          
     def self.flash(msg)
-      request = "{\"text\":\"#{msg}\", \"flash\": \"true\"}\r\n"
-      socket = TCPSocket.open("127.0.0.1","2000")
-      socket.print(request)               # Send request
-      socket.close
+      tcp_send "{\"text\":\"#{msg}\", \"flash\": \"true\"}\r\n"
     end
      def self.clear()
-      request = "{\"command\":\"clear\"}\r\n"
-      socket = TCPSocket.open("127.0.0.1","2000")
-      socket.print(request)               # Send request
-      socket.close
+      tcp_send "{\"command\":\"clear\"}\r\n"
     end    
   end
 
@@ -132,7 +110,7 @@ module HeatController
         #puts "action #{a} old_state#{old_state} new_state#{new_state} -- "
         if old_state.to_i != new_state.to_i
           Wiringpi.digitalWrite(pin, new_state)
-          HeatController.log("Kanal #{channel}  wurde auf #{a} gesetzt" )
+          log("Channel #{channel} set to #{a} " )
           return true
         end
         false
@@ -239,10 +217,12 @@ module HeatController
       
       
       def fallback_programm
-        config = ConfigReader.config
+        config = ConfigReader.read_config_file
+        log "Fallback programm activated"
         config[:actuators].each do | actuator |
-          executed = RelaisCard.send(actuator[:fallback_state], actuator[:channel])
-          Lcd.sline("#{actuator[:name]}=>#{actuator[:fallback_state]=="on"? "An": "Aus"}")
+          log " fallback #{actuator}"
+          RelaisCard.send(actuator[:fallback_state], actuator[:channel])
+          #Lcd.sline("#{actuator[:name]}=>#{actuator[:fallback_state]=="on"? "An": "Aus"}")
           sleep(3)
         end
       end
@@ -347,7 +327,6 @@ module HeatController
       end
       def init
         # wait for lcd server to go up
-        Logger.init
         wait_for_lcd_server
         ConfigReader.read_config_file
         ConfigReader.reload_config if ConfigReader.detect_usb_drive         
@@ -382,6 +361,21 @@ module HeatController
       end  
     end
   end
+end
+
+
+Signal.trap('INT') do|_signo|
+  HeatController::MainController.fallback_programm
+  exit(0)
+end
+Signal.trap('KILL') do|_signo|
+  HeatController::MainController.fallback_programm
+  exit(0)
+end
+
+Signal.trap('TERM') do|_signo|
+  HeatController::MainController.fallback_programm
+  exit(0)
 end
 
 HeatController::MainController.run

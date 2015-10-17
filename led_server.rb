@@ -42,6 +42,12 @@ module RubyLed
       def green(params=nil)
         on(P_GREEN)
       end
+      
+      def pink(params=nil)
+        on(P_BLUE)
+        on(P_RED)
+      end
+      
       def off(params=nil)
         all_off
       end
@@ -63,9 +69,8 @@ module RubyLed
    
       # okay ==> warning ==> error 3 *  DEFAULT_LOOP_COUNT 
       # action => okay ==> warning ==> error  4 * DEFAULT_LOOP_COUNT
-      def error (params=nil)        
+      def error (params=nil)
         blink(P_RED, 0.2, 0.2, params)
-
       end      
       def okay (params=nil)
         blink(P_GREEN, 0.8, 0.45, params)
@@ -85,6 +90,7 @@ module RubyLed
       def funny (params=nil)                
         blink([P_BLUE, P_GREEN], 0.25, 0.25, params)        
       end
+      
     end
   end
   class Request    
@@ -124,8 +130,8 @@ module RubyLed
 
     def self.start
       Led.init
-      #Led.okay
-
+      Led.pink
+      log("Led Server started") 
       @threads = []
       Thread::abort_on_exception = true  
       server = TCPServer.new("localhost", 2010)  # Server bind to port 2010
@@ -145,5 +151,18 @@ module RubyLed
   end
 end
 
+Signal.trap('INT') do|_signo|
+  RubyLed::Led.all_off  
+  exit(0)
+end
+Signal.trap('KILL') do|_signo|
+  RubyLed::Led.all_off  
+  exit(0)
+end
+
+Signal.trap('TERM') do|_signo|
+  RubyLed::Led.all_off  
+  exit(0)
+end
 
 RubyLed::Server.start
