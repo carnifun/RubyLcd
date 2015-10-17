@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
-
+require 'rubygems'
+require 'ruby-debug'
 class String
   def to_16
     self + " " * (16 - size)
@@ -217,6 +218,7 @@ module HeatController
       
       
       def fallback_programm
+        debugger
         config = ConfigReader.config        
         config[:actuators].each do | actuator |
           log " fallback #{actuator}"
