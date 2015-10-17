@@ -134,7 +134,7 @@ module HeatController
         int_file = "/etc/network/interfaces"
         int_file = "/home/pi/interfaces"
         content = File.read(int_file) 
-        content.gsub(/wpa-ssid.*/, "wpa-psk \"#{@config[:network][:ssid]}\"")
+        content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
         content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
         f = File.open(int_file, "w+")
         f.puts content
@@ -153,7 +153,7 @@ module HeatController
             end
           end
           if new_file
-            update_network_setting            
+            #update_network_setting            
           end
         end
       def json_from_file ( file )
