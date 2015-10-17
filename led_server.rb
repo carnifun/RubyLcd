@@ -1,4 +1,6 @@
 #!/usr/bin/ruby
+APP_ROOT = "/heatcontroll"
+load "#{APP_ROOT}/logger.rb"
 
 module RubyLed
   DEFAULT_LOOP_COUNT = 60 # ca 30 sekunden
