@@ -218,13 +218,12 @@ module HeatController
       
       def fallback_programm
         config = ConfigReader.read_config_file
-        log "Fallback programm activated"
         config[:actuators].each do | actuator |
           log " fallback #{actuator}"
           RelaisCard.send(actuator[:fallback_state], actuator[:channel])
           #Lcd.sline("#{actuator[:name]}=>#{actuator[:fallback_state]=="on"? "An": "Aus"}")
-          sleep(3)
         end
+        log "Fallback programm activated"
       end
       def read_sensor_temperatur(sensor_id)       
         sfile = "/sys/bus/w1/devices/#{sensor_id}/w1_slave"

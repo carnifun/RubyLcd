@@ -23,8 +23,11 @@ def stop (proc)
   kill = 9 
   pid = is_running?(proc)  
   if pid
-    `kill -#{term} #{pid} ` 
-    sleep(5)
+    `kill -#{term} #{pid} `
+    10.times do | i |   
+      puts " wating for process to finish #{i}"
+      sleep(1)
+    end 
     # wait the process to go fallback
     `kill -#{kill} #{pid} ` 
     puts "#{proc} gestoppt "
