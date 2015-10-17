@@ -1,4 +1,4 @@
-APP_ROOT = "/heatcontroll"
+APP_ROOT ||= "/heatcontroll"
   class Logger
     class << self
       CONSOLE = false
@@ -10,7 +10,7 @@ APP_ROOT = "/heatcontroll"
       end
       def init
         return if initialized?
-        @@logger_handler =  File.open(File.join(APP_ROOT, "debug.log"), "w+")         
+        @@logger_handler =  File.open(File.join(APP_ROOT, "log","debug.log"), "w+")         
         @@initialized = true
       end
       def logger_handler 
@@ -24,7 +24,9 @@ APP_ROOT = "/heatcontroll"
           puts message
         else
           return unless DEBUG
-          logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][INFO]:#{message}\n")        
+          puts " Ich war hier action loggen mit message #{message}"
+          logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][INFO]:#{message}\n")     
+          logger_handler.flush   
         end
       end
       def log_error(message)
