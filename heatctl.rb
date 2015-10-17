@@ -25,12 +25,12 @@ def stop (proc, wait=false)
   if pid
     `kill -#{term} #{pid} `
     3.times do | i |   
-      puts " wating for process to finish #{i}"
+      puts "wating for process to finish #{i}"
       sleep(1)
     end if wait
     # wait the process to go fallback
     `kill -#{kill} #{pid} ` 
-    puts "#{proc} gestoppt "
+    puts "#{proc} Killed "
   else
     puts "#{proc} is not running "
   end  
@@ -40,7 +40,7 @@ def start(proc)
   base = File.basename( proc , ".*" )
   if !is_running?(proc)  
     system "ruby #{APP_ROOT}/#{proc} >> #{LOG_PATH}/#{base}.log 2>&1 &"
-    puts "#{base} gestartet"
+    puts "#{base} started"
   else
     puts "#{base} already running"    
   end
