@@ -24,7 +24,7 @@ def stop (proc, wait=false)
   pid = is_running?(proc)  
   if pid
     `kill -#{term} #{pid} `
-    10.times do | i |   
+    3.times do | i |   
       puts " wating for process to finish #{i}"
       sleep(1)
     end if wait
