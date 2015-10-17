@@ -133,10 +133,10 @@ module HeatController
       def update_network_setting
         return unless @config[:network]
         int_file = "/etc/network/interfaces"
-        int_file = "/home/pi/interfaces"
+        #int_file = "/home/pi/interfaces"
         content = File.read(int_file) 
-        content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
-        content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
+        content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\" #changed from heatcontroll")
+        content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\" # changed from Heatcontrol")
         f = File.open(int_file, "w+")
         f.puts content
         f.close
@@ -154,7 +154,10 @@ module HeatController
             end
           end
           if new_file            
-            update_network_setting            
+            update_network_setting
+ 	    Lcd.mlines("Netzwerk wird".to_16+  "in 20 Sekunden Neu gestartet ")
+            sleep(20)
+	    system("/etc/init.d/networking restart")
           end
         end
       def json_from_file ( file )
