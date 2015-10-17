@@ -134,8 +134,8 @@ module HeatController
         int_file = "/etc/network/interfaces"
         int_file = "/home/pi/interfaces"
         content = File.read(int_file) 
-        content.gsub(/wpa-ssid\s+[^\S\n]*/,@config[:network][:ssid])
-        content.gsub(/wpa-psk\s+[^\S\n]*/,@config[:network][:psk])
+        content.gsub(/wpa-ssid.*/, "wpa-psk \"#{@config[:network][:ssid]}\"")
+        content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
         f = File.open(int_file, "w+")
         f.puts content
         f.close
@@ -182,6 +182,9 @@ module HeatController
           sleep(2)
           return 
         end
+        Lcd.mlines("Lade neue     Konfiguration ")
+        sleep(4)
+
         File.open(File.join(APP_ROOT, "config",md5), "w+") do |f |
           f.puts content
         end

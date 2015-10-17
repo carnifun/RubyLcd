@@ -1,8 +1,4 @@
-{
-	"network": {
-		"ssid": "mytimemachine_bunker",
-		"psk": "myorangehaus2015"
-	},
+{	
 	"sensors": [
 		{
 			"name": "s1",
