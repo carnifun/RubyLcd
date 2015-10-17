@@ -24,7 +24,6 @@ APP_ROOT ||= "/heatcontroll"
           puts message
         else
           return unless DEBUG
-          puts " Ich war hier action loggen mit message #{message}"
           logger_handler.puts("[#{Time.now.strftime("%d.%m.%Y %H:%M:%S")}][INFO]:#{message}\n")     
           logger_handler.flush   
         end

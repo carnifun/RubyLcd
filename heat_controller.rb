@@ -218,9 +218,7 @@ module HeatController
       
       def fallback_programm
         config = ConfigReader.config
-        puts config
         config[:actuators].each do | actuator |
-          log " fallback #{actuator}"
           RelaisCard.send(actuator[:fallback_state], actuator[:channel])
           #Lcd.sline("#{actuator[:name]}=>#{actuator[:fallback_state]=="on"? "An": "Aus"}")
         end
