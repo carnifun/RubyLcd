@@ -128,7 +128,19 @@ module HeatController
     
     class << self
       @config = nil            
-      def read_config_file
+      
+      def update_network_setting
+        return unless @config[:network]
+        int_file = "/etc/network/interfaces"
+        int_file = "/home/pi/interfaces"
+        content = File.read(int_file) 
+        content.gsub(/wpa-ssid\s+[^\S\n]*/,@config[:network][:ssid])
+        content.gsub(/wpa-psk\s+[^\S\n]*/,@config[:network][:psk])
+        f = File.open(int_file, "w+")
+        f.puts content
+        f.close
+      end
+      def read_config_file(new_file=false)
           @config = json_from_file(File.join(APP_ROOT, "config","config.json")) 
           if @config.nil? 
             Lcd.mlines("lade default".to_16 + "Configuration")          
@@ -139,6 +151,9 @@ module HeatController
               Led.fatal_error
               exit()
             end
+          end
+          if new_file
+            update_network_setting            
           end
         end
       def json_from_file ( file )
@@ -173,7 +188,7 @@ module HeatController
         File.open(File.join(APP_ROOT, "config","config.json"), "w+") do |f |
           f.puts content
         end
-        read_config_file
+        read_config_file(true)
       end
       def detect_usb_drive
          # first check if we have the sda? directory 
