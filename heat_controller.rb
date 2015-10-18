@@ -156,7 +156,7 @@ module HeatController
           end
           if new_file            
             update_network_setting
- 	          Lcd.mlines("System Reboot".to_16+  "Now.")
+ 	          Lcd.mlines("System Reboot".to_16+  "Usb entfernen.")
             sleep(5)
 	          system('reboot')		
 	          exit(0)	
