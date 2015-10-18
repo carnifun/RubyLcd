@@ -156,10 +156,10 @@ module HeatController
           end
           if new_file            
             update_network_setting
- 	    Lcd.mlines("Bitte neu".to_16+  "starten.")
+ 	          Lcd.mlines("System Reboot".to_16+  "Now.")
             sleep(5)
-	    system('reboot')		
-	    exit(0)	
+	          system('reboot')		
+	          exit(0)	
           end
         end
       def json_from_file ( file )
@@ -176,16 +176,16 @@ module HeatController
       end
       def reload_config
         require 'digest/md5'      
-        #content = File.read("/media/usb/config.json")
- 	content = File.read("/heatcontroll/config/config.test")
+        content = File.read("/media/usb/config.json")
+ 	      #content = File.read("/heatcontroll/config/config.test")
 
 
-        md5 = Digest::MD5.hexdigest(content)
-        if File.exists?(File.join(APP_ROOT, "config",md5))       
-          Lcd.mlines("Konfiguration ist breits aktuell")
-          sleep(3)
-          return  
-        end
+        #md5 = Digest::MD5.hexdigest(content)
+        #if File.exists?(File.join(APP_ROOT, "config",md5))       
+        #  Lcd.mlines("Konfiguration ist breits aktuell")
+        #  sleep(3)
+        #  return  
+        #end
         if json_from_content(content).nil?
           Lcd.mlines("Konfiguration    ist FEHLERHAFT")
           sleep(2)
@@ -194,9 +194,9 @@ module HeatController
         Lcd.mlines("Lade neue     Konfiguration ")
         sleep(4)
 
-        File.open(File.join(APP_ROOT, "config",md5), "w+") do |f |
-          f.puts content
-        end
+        #File.open(File.join(APP_ROOT, "config",md5), "w+") do |f |
+        #  f.puts content
+        #end
         File.open(File.join(APP_ROOT, "config","config.json"), "w+") do |f |
           f.puts content
         end
@@ -354,7 +354,7 @@ module HeatController
         # wait for lcd server to go up
         wait_for_lcd_server
         ConfigReader.read_config_file
-        ConfigReader.reload_config  #if ConfigReader.detect_usb_drive         
+        ConfigReader.reload_config  if ConfigReader.detect_usb_drive         
         Wiringpi.wiringPiSetup
         RelaisCard.init       
       end      
