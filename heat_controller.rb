@@ -132,11 +132,12 @@ module HeatController
       
       def update_network_setting
         return unless @config[:network]
-        int_file = "/etc/network/interfaces"
-        #int_file = "/home/pi/interfaces"
+        #int_file = "/etc/network/interfaces"
+        int_file = "/home/pi/interfaces"
         content = File.read(int_file) 
-        content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\" #changed from heatcontroll")
-        content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\" # changed from Heatcontrol")
+        content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
+        content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
+	content +="\n#was hier "
         f = File.open(int_file, "w+")
         f.puts content
         f.close
@@ -155,9 +156,10 @@ module HeatController
           end
           if new_file            
             update_network_setting
- 	    Lcd.mlines("Netzwerk wird".to_16+  "in 20 Sekunden Neu gestartet ")
-            sleep(20)
-	    system("/etc/init.d/networking restart")
+ 	    Lcd.mlines("Bitte neu".to_16+  "starten.")
+            sleep(5)
+	    system('reboot')		
+	    exit(0)	
           end
         end
       def json_from_file ( file )
@@ -174,8 +176,8 @@ module HeatController
       end
       def reload_config
         require 'digest/md5'      
-        content = File.read("/media/usb/config.json")
- 	#content = File.read("/heatcontroll/config/config.test")
+        #content = File.read("/media/usb/config.json")
+ 	content = File.read("/heatcontroll/config/config.test")
 
 
         md5 = Digest::MD5.hexdigest(content)
@@ -352,7 +354,7 @@ module HeatController
         # wait for lcd server to go up
         wait_for_lcd_server
         ConfigReader.read_config_file
-        ConfigReader.reload_config  if ConfigReader.detect_usb_drive         
+        ConfigReader.reload_config  #if ConfigReader.detect_usb_drive         
         Wiringpi.wiringPiSetup
         RelaisCard.init       
       end      

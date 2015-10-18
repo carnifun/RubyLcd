@@ -1,7 +1,7 @@
 {
 	"network": {
-		"ssid": "bmytimemachine_bunker",
-		"psk": "bmyorangehaus2015"
+		"ssid": "timemachine_bunker_boo",
+		"psk": "orangehaus2015_boo"
 	},
 	"sensors": [
 		{
@@ -50,16 +50,16 @@
 			"fallback_state": "off",
 			"rules": [
 				{
-					"action": "off",
+					"action": "on",
 					"and_conditions": [
 						{
 							"sensor": "S2",
-							"comparator": "<",
-							"value": "22"
+							"comparator": ">",
+							"value": "20"
 						}
 					]
 				}, {
-					"action": "on",
+					"action": "off",
 					"and_conditions": [
 						{
 							"sensor": "S2",

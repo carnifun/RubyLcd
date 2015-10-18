@@ -1,17 +1,15 @@
-{	
-"network": {
-		"ssid": "bmytimemachine_bunker",
-		"psk": "bmyorangehaus2015"
+{
+	"network": {
+		"ssid": "timemachine_bunker_boo",
+		"psk": "orangehaus2015_boo"
 	},
-
-
 	"sensors": [
 		{
-			"name": "s1",
+			"name": "S1",
 			"description": "Sensor an der Therme 1 ",
 			"id": "10-000802c68099"
 		}, {
-			"name": "s2",
+			"name": "S2",
 			"description": "Sensor am uv-pumpe 2 ",
 			"id": "10-000802bf0598"
 		}
@@ -26,22 +24,22 @@
 					"action": "on",
 					"and_conditions": [
 						{
-							"sensor": "s1",
+							"sensor": "S1",
 							"comparator": ">",
 							"value": "19"
 						}, {
-							"sensor": "s2",
+							"sensor": "S2",
 							"comparator": ">",
-							"value": "25"
+							"value": "19"
 						}
 					]
 				}, {
 					"action": "off",
 					"and_conditions": [
 						{
-							"sensor": "s2",
+							"sensor": "S2",
 							"comparator": "<",
-							"value": "25"
+							"value": "18"
 						}
 					]
 				}
@@ -52,21 +50,21 @@
 			"fallback_state": "off",
 			"rules": [
 				{
-					"action": "off",
-					"and_conditions": [
-						{
-							"sensor": "s2",
-							"comparator": "<",
-							"value": "22"
-						}
-					]
-				}, {
 					"action": "on",
 					"and_conditions": [
 						{
-							"sensor": "s2",
+							"sensor": "S2",
 							"comparator": ">",
-							"value": "25"
+							"value": "20"
+						}
+					]
+				}, {
+					"action": "off",
+					"and_conditions": [
+						{
+							"sensor": "S2",
+							"comparator": ">",
+							"value": "24"
 						}
 					]
 				}
