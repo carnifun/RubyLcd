@@ -111,7 +111,6 @@ end
 Signal.trap('INT') do|_signo|
   RubyLcd.clear
   RubyLcd.driver.init
-  exit(0)
 end
 Signal.trap('KILL') do|_signo|
   RubyLcd.clear
