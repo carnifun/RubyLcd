@@ -38,10 +38,10 @@ end
 
 def restart (proc, wait=false)
   # terminate
-  term = 15
+  int = 2
   pid = is_running?(proc)  
   if pid
-    `kill -#{term} #{pid} `
+    `kill -#{int} #{pid} `
     puts "#{proc} restarted "
   else
     puts "#{proc} is not running "
