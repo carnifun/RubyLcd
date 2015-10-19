@@ -137,7 +137,6 @@ module HeatController
         content = File.read(int_file) 
         content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
         content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
-	      content +="\n#was hier "
         f = File.open(int_file, "w+")
         f.puts content
         f.close

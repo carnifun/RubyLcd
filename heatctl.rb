@@ -36,6 +36,20 @@ def stop (proc, wait=false)
   end  
 end
 
+def restart (proc, wait=false)
+  # terminate
+  term = 15
+  pid = is_running?(proc)  
+  if pid
+    `kill -#{term} #{pid} `
+    puts "#{proc} restarted "
+  else
+    puts "#{proc} is not running "
+  end  
+end
+
+
+
 def start(proc)
   base = File.basename( proc , ".*" )
   if !is_running?(proc)  
@@ -59,5 +73,8 @@ elsif command =="stop"
   stop("lcd_server.rb")   
   stop("led_server.rb")   
   stop("heat_controller.rb", true)      
+elsif command =="restart" 
+  restart("lcd_server.rb")   
+  #stop("heat_controller.rb", true)      
 end
 
