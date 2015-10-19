@@ -60,7 +60,9 @@ module RubyLcd
     require 'thread'
     
     STATUS_INTERUPT = 1
-
+    def threads
+      @threads || [] 
+    end
     def self.kill_others
       @threads.each do |t|
           Thread.kill t if (t.object_id != Thread.current.object_id)           
@@ -109,7 +111,9 @@ end
 
 
 Signal.trap('INT') do|_signo|
-  RubyLcd.clear
+   RubyLcd.threads.each do |t|
+    Thread.kill t 
+  end if 
   RubyLcd.driver.init
 end
 Signal.trap('KILL') do|_signo|
