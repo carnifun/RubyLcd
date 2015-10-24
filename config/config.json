@@ -1,19 +1,22 @@
 {
-	"network": {
-		"ssid": "timemachine_bunker_boo",
-		"psk": "orangehaus2015_boo"
+	"_network": {
+		"ssid": "your_ssid",
+		"psk": "your_passwork"
 	},
 	"sensors": [
 		{
-			"name": "S1",
+			"name": "s1",
 			"description": "Sensor an der Therme 1 ",
-			"id": "10-000802c68099"
+			"id": "28-011581c21fff"
 		}, {
-			"name": "S2",
+			"name": "s2",
 			"description": "Sensor am uv-pumpe 2 ",
-			"id": "10-000802bf0598"
-		}
-	],
+			"id": "28-0115811daeff"
+		}, {  
+			"name": "s3",
+			"description": "Sensor am uv-pumpe 2 ",
+			"id": "28-011581c31aff"
+		}],
 	"actuators": [
 		{
 			"name": "UWP-1",
@@ -66,6 +69,31 @@
 							"sensor": "S2",
 							"comparator": ">",
 							"value": "24"
+						}
+					]
+				}
+			]
+		}, {
+			"name": "UWP-3",
+			"channel": "4",
+			"fallback_state": "on",
+			"rules": [
+				{
+					"action": "on",
+					"and_conditions": [
+						{
+							"sensor": "S3",
+							"comparator": ">",
+							"value": "25"
+						}
+					]
+				}, {
+					"action": "off",
+					"and_conditions": [
+						{
+							"sensor": "S3",
+							"comparator": "<",
+							"value": "22"
 						}
 					]
 				}

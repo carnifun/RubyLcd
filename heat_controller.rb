@@ -162,7 +162,8 @@ module HeatController
           end
         end
       def json_from_file ( file )
-        puts "reading file #{file}"
+        log " loading #{file}"
+
         content = File.read(file) if File.exists?(file)
         json_from_content(content) unless content.nil?
       end  
