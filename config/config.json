@@ -17,7 +17,7 @@
 	"actuators": [
 		{
 			"name": "UWP-1",
-			"channel": "1",
+			"channel": "4",
 			"fallback_state": "on",
 			"rules": [
 				{
@@ -46,7 +46,7 @@
 			]
 		}, {
 			"name": "UWP-2",
-			"channel": "2",
+			"channel": "3",
 			"fallback_state": "off",
 			"rules": [
 				{

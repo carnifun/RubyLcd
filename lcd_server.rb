@@ -111,9 +111,6 @@ end
 
 
 Signal.trap('INT') do|_signo|
-   RubyLcd.threads.each do |t|
-    Thread.kill t 
-  end if 
   RubyLcd.driver.init
 end
 Signal.trap('KILL') do|_signo|
