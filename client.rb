@@ -47,7 +47,7 @@ module RubyLcd
 
       request = "{\"text\":\"#{msg}\", \"single_line\":\"#{row}\" }\r\n"
 
-      socket = TCPSocket.open("127.0.0.1","2000")
+      socket = TCPSocket.open("127.0.0.1","13666")
       socket.print(request)               # Send request
       #response = socket.read              # Read complete response
       # Split response at first blank line into headers and body
@@ -88,5 +88,32 @@ module RubyLcd
       socket.close
       #puts response
     end
+    
+    def self.mlines(msg="default pages multiline message from client")
+      puts " start"
+      socket = TCPSocket.open("localhost","13666")
+      socket.print("hello\n")
+      puts " waiting for responce "
+      response = socket.read 
+      puts responce
+      sleep(1)
+      socket.print("screen_add heat_s\n")
+            response = socket.read 
+      puts responce
+      sleep(1)
+      socket.print("widget_add heat_s Page string\n")
+            response = socket.read 
+      puts responce
+      sleep(1)
+      socket.print("widget_set heat_s Name 1 1 \" Das ist meine Nachricht \"\n")
+            response = socket.read 
+      puts responce
+      sleep(1)
+      socket.print("widget_set heat_s Name 2 1 \" Status \"\n")
+      socket.close
+      #puts response
+    end
+    
+    
   end
 end

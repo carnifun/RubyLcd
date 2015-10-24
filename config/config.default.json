@@ -3,17 +3,21 @@
 		{
 			"name": "s1",
 			"description": "Sensor an der Therme 1 ",
-			"id": "10-000802c68099"
+			"id": "28-011581c21fff"
 		}, {
 			"name": "s2",
 			"description": "Sensor am uv-pumpe 2 ",
-			"id": "10-000802bf0598"
+			"id": "28-0115811daeff"
+		}, {  
+			"name": "s3",
+			"description": "Sensor am uv-pumpe 2 ",
+			"id": "28-011581c31aff"
 		}
 	],
 	"actuators": [
 		{
 			"name": "UWP-1",
-			"channel": "1",
+			"channel": "4",
 			"fallback_state": "on",
 			"rules": [
 				{
@@ -66,5 +70,68 @@
 				}
 			]
 		}
+	],{
+			"name": "UWP-3",
+			"channel": "3",
+			"fallback_state": "off",
+			"rules": [
+				{
+					"action": "off",
+					"and_conditions": [
+						{
+							"sensor": "s3",
+							"comparator": "<",
+							"value": "22"
+						}
+					]
+				}, {
+					"action": "on",
+					"and_conditions": [
+						{
+							"sensor": "s3",
+							"comparator": ">",
+							"value": "22"
+						}
+					]
+				}
+			]
+		}
 	]
 }
+
+widget_set heat_s2 w1 1 1 "From second screen "
+
+hello
+connect LCDproc 0.5.x protocol 0.3 lcd wid 16 hgt 2 cellwid 5 cellhgt 8
+screen_add heat_s -priority 0
+huh? Usage: screen_add <screenid>
+screen_add heat_s
+success
+listen heat_s
+widget_add heat_s w1
+huh? Usage: widget_add <screenid> <widgetid> <widgettype> [-in <id>]
+widget_add heat_s w1 scroller
+success
+widget_set heat_s w1 "mein Text"
+huh? Wrong number of arguments
+wiget_set heat_s w1 string " das ist mein langer Text"
+huh? Invalid command "wiget_set"
+widget_set heat_s w1 string " das ist mein langer Text"
+huh? Wrong number of arguments
+widget_set heat_s w1 string 1 1 " das ist mein langer Text"
+huh? Wrong number of arguments
+widget_add heat_s Name string
+success
+widget_set heat_s Name 1 1 " meine daten "
+success
+
+
+s.print (" 
+
+hello
+screen_add Screen01
+screen_set Screen01 -priority 0
+widget_add Screen01 Number string
+widget_add Screen01 Name string
+widget_set Screen01 Number 1 1 "Dies ist zeile eins"
+widget_set Screen01 Name 1 2 "Dies ist zeile zwei"")
