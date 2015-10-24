@@ -5,15 +5,15 @@
 	},
 	"sensors": [
 		{
-			"name": "s1",
+			"name": "S1",
 			"description": "Sensor an der Therme 1 ",
 			"id": "28-011581c21fff"
 		}, {
-			"name": "s2",
+			"name": "S2",
 			"description": "Sensor am uv-pumpe 2 ",
 			"id": "28-0115811daeff"
 		}, {  
-			"name": "s3",
+			"name": "S3",
 			"description": "Sensor am uv-pumpe 2 ",
 			"id": "28-011581c31aff"
 		}],

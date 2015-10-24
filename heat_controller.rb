@@ -311,7 +311,7 @@ module HeatController
         config = ConfigReader.config
         
         config[:sensors].each do |s |
-          return s[:id] if s[:name] == name
+        return s[:id] if s[:name].downcase == name.downcase
         end
       end
       
@@ -319,7 +319,7 @@ module HeatController
         rule_conditions = und ?  rule[:and_conditions] : rule[:or_conditions]        
         rule_conditions.map do | condition |
           s_id = sensor_name_to_id(condition[:sensor])
-        
+          
           c = (@sensor_data[s_id]>0) ? " #{@sensor_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f  " : " false "            
           "( #{c} )"
         end.join(und ?  " and " : " or ") if rule_conditions
