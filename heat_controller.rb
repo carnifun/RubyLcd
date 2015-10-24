@@ -14,7 +14,7 @@ module HeatController
   HIGH = 1 
   LOW = 0    
   T_MS = 1.0000000/1000000
-  MAIN_LOOP_INTERVALL = 10
+  MAIN_LOOP_INTERVALL = 3
   
   class Led
     require 'socket'
@@ -241,9 +241,7 @@ module HeatController
 
   class MainController
     class << self
-      @sensor_data={}
-      
-      
+      @sensor_data=[]            
       def fallback_programm
         config = ConfigReader.config
         config[:actuators].each do | actuator |
@@ -265,14 +263,18 @@ module HeatController
       def update_status
         config = ConfigReader.config
         status ="" 
+        
+        last_sensor_data = sensor_data = @sensor_data.last 
+        last_sensor_data = @sensor_data.last(2).first if @sensor_data.length > 1 
         config[:sensors].each do | s |
-          status +="#{s[:name]}:#{@sensor_data[s[:id]].to_i} C".to_16          
+          variation = (sensor_data[s[:id]] - last_sensor_data[s[:id]] ) > 0.0 ? "+" : "-"
+          status +="#{s[:name]}: #{sprintf('%.2f',sensor_data[s[:id]])} Celsius #{variation}".to_16          
         end
         
         config[:actuators].each do | actuator |
           state = RelaisCard.get_state(actuator)
           #puts "state #{state} == 1 "
-          status +="#{actuator[:name]}:#{state==1?"Aus":"An"}".to_16
+          status +="#{actuator[:name]}: #{state==1?"Aus":"An"}".to_16
         end
         Lcd.mlines(status)
       end
@@ -280,14 +282,18 @@ module HeatController
       def read_temperature
         config = ConfigReader.config
         return_value =  true
-        @sensor_data={}
-        config[:sensors].each do |s |
-          @sensor_data[s[:id]] = read_sensor_temperatur(s[:id])
-          if @sensor_data[s[:id]]<1
+        
+        
+        @sensor_data.shift if @sensor_data.size > 10
+        sensor_data = {} 
+        config[:sensors].each do |s|
+          sensor_data[s[:id]] = read_sensor_temperatur(s[:id])
+          if sensor_data[s[:id]]<1
             Lcd.mlines("Achtung ".to_16 + "#{s[:name]} defekt!")
             return_value =  false
           end
         end
+        @sensor_data << sensor_data
         return_value
       end
       def get_sensor (s_id)
@@ -319,8 +325,8 @@ module HeatController
         rule_conditions = und ?  rule[:and_conditions] : rule[:or_conditions]        
         rule_conditions.map do | condition |
           s_id = sensor_name_to_id(condition[:sensor])
-          
-          c = (@sensor_data[s_id]>0) ? " #{@sensor_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f  " : " false "            
+          sensor_data = @sensor_data.last          
+          c = (sensor_data[s_id]>0) ? " #{sensor_data[s_id]} #{condition[:comparator]} '#{condition[:value]}'.to_f  " : " false "            
           "( #{c} )"
         end.join(und ?  " and " : " or ") if rule_conditions
       end
