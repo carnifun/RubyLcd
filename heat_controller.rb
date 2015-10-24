@@ -2,7 +2,11 @@
 
 class String
   def to_16
-    self + " " * (16 - size)
+    if 16 - size > 0
+      self + " " * (16 - size)
+    else
+     self	
+    end
   end
 end
 
@@ -267,8 +271,8 @@ module HeatController
         last_sensor_data = sensor_data = @sensor_data.last 
         last_sensor_data = @sensor_data.last(2).first if @sensor_data.length > 1 
         config[:sensors].each do | s |
-          variation = (sensor_data[s[:id]] - last_sensor_data[s[:id]] ) > 0.0 ? "+" : "-"
-          status +="#{s[:name]}: #{sprintf('%.2f',sensor_data[s[:id]])} Celsius #{variation}".to_16          
+          variation = (sensor_data[s[:id]] - last_sensor_data[s[:id]] ) > 0.0 ? "+" : "-"	
+          status +="#{s[:name]}:+#{sprintf('%.2f',sensor_data[s[:id]])} C #{variation}".to_16          
         end
         
         config[:actuators].each do | actuator |
@@ -358,6 +362,7 @@ module HeatController
         end
       end
       def init
+	@sensor_data=[]
         # wait for lcd server to go up
         wait_for_lcd_server
         ConfigReader.read_config_file
@@ -365,6 +370,10 @@ module HeatController
         Wiringpi.wiringPiSetup
         RelaisCard.init       
       end      
+      def touch_pid_file
+	require "fileutils"
+	FileUtils.touch("/heatcontroll/tmp/heatcontroll.pid")
+      end		
       def run
         # main loop
         Led.loading
@@ -389,6 +398,7 @@ module HeatController
           end
           update_status
           sleep(MAIN_LOOP_INTERVALL)
+	  touch_pid_file	
         end        
       end  
     end

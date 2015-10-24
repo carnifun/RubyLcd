@@ -20,7 +20,7 @@
 	"actuators": [
 		{
 			"name": "UWP-1",
-			"channel": "4",
+			"channel": "1",
 			"fallback_state": "on",
 			"rules": [
 				{
@@ -29,20 +29,16 @@
 						{
 							"sensor": "S1",
 							"comparator": ">",
-							"value": "19"
-						}, {
-							"sensor": "S2",
-							"comparator": ">",
-							"value": "19"
+							"value": "24"
 						}
 					]
 				}, {
 					"action": "off",
 					"and_conditions": [
 						{
-							"sensor": "S2",
+							"sensor": "S1",
 							"comparator": "<",
-							"value": "18"
+							"value": "24"
 						}
 					]
 				}
@@ -50,7 +46,7 @@
 			
 		}, {
 			"name": "UWP-2",
-			"channel": "3",
+			"channel": "2",
 			"fallback_state": "off",
 			"rules": [
 				{
@@ -59,7 +55,7 @@
 						{
 							"sensor": "S2",
 							"comparator": ">",
-							"value": "20"
+							"value": "26"
 						}
 					]
 				}, {
@@ -67,7 +63,7 @@
 					"and_conditions": [
 						{
 							"sensor": "S2",
-							"comparator": ">",
+							"comparator": "<",
 							"value": "24"
 						}
 					]
@@ -84,7 +80,7 @@
 						{
 							"sensor": "S3",
 							"comparator": ">",
-							"value": "25"
+							"value": "28"
 						}
 					]
 				}, {
@@ -93,7 +89,7 @@
 						{
 							"sensor": "S3",
 							"comparator": "<",
-							"value": "22"
+							"value": "28"
 						}
 					]
 				}
