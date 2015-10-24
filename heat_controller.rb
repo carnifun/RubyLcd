@@ -18,7 +18,7 @@ module HeatController
   HIGH = 1 
   LOW = 0    
   T_MS = 1.0000000/1000000
-  MAIN_LOOP_INTERVALL = 3
+  MAIN_LOOP_INTERVALL = 15
   
   class Led
     require 'socket'
