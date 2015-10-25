@@ -81,7 +81,7 @@ module RubyLcd
     @@charCount = 0
     @@onPi      = true # So I can debug the non-RaspberryPi code on a separate machine
     @@initialized = false
-    PAGES_VIEW_INTERVALL = 5
+    PAGES_VIEW_INTERVALL = 3
     SLIDE_INTERVAL = 1
     class << self
       def initialized?

@@ -135,7 +135,7 @@ module HeatController
       @config = nil            
       
       def update_network_setting
-        return unless @config[:network]
+        return false unless @config[:network]
         int_file = "/etc/network/interfaces"
         #int_file = "/home/pi/interfaces"
         content = File.read(int_file) 
@@ -144,6 +144,7 @@ module HeatController
         f = File.open(int_file, "w+")
         f.puts content
         f.close
+        true
       end
       def read_config_file(new_file=false)
           @config = json_from_file(File.join(APP_ROOT, "config","config.json")) 
@@ -158,11 +159,12 @@ module HeatController
             end
           end
           if new_file            
-            update_network_setting
- 	          Lcd.mlines("System Reboot".to_16+  "Usb entfernen.")
-            sleep(5)
-	          system('reboot')		
-	          exit(0)	
+            if update_network_setting
+ 	            Lcd.mlines("System Reboot".to_16+  "Usb entfernen.")
+              sleep(5)
+	            system('reboot')		
+	            exit(0)
+	          end  	
           end
         end
       def json_from_file ( file )
