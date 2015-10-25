@@ -37,3 +37,4 @@ build/
 /log
 /config/*.md5
 /config/config.json
+images

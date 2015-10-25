@@ -136,7 +136,7 @@ module HeatController
       
       def update_network_setting
         return false unless @config[:network]
-        int_file = "/etc/wpa_supplicant/wpa_supplicant.conf_back"
+        int_file = "/etc/wpa_supplicant/wpa_supplicant.conf"
         content = File.read(int_file) 
         content = content.gsub(/ssid=.*/, "ssid=\"#{@config[:network][:ssid]}\"")
         content = content.gsub(/psk=.*/, "psk=\"#{@config[:network][:psk]}\"")
