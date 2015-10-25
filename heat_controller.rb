@@ -184,17 +184,20 @@ module HeatController
       def reload_config
         require 'digest/md5'      
         content = File.read("/media/usb/config.json")
+        log(content)
         md5 = Digest::MD5.hexdigest(content)
         if File.exists?(File.join(APP_ROOT, "config","#{md5}.md5"))       
           log("Konfiguration ist breits aktuell")
           #sleep(3)
           return  
         end
-        if json_from_content(content).nil?
+        if json_from_content(content).nil?          
+          log ("Konfiguration    ist FEHLERHAFT")
           Lcd.mlines("Konfiguration    ist FEHLERHAFT")
           sleep(2)
           return 
         end
+        log ("lade neue Konfiguration")
         Lcd.mlines("Lade neue     Konfiguration ")
         sleep(4)
 
@@ -221,13 +224,16 @@ module HeatController
            Lcd.mlines("Usb erkannt")
            sleep(1)         
            system("unmount /media/usb")
+           sleep(1)
            system("mount #{usb_path} /media/usb")
-           Lcd.mlines("Usb-media       Wird gelesen")
+           Lcd.mlines("Usb           wird gelesen")
            sleep(2)
-           if File.exists?("/media/usb/config.json")           
+           if File.exists?("/media/usb/config.json")
+             log (" config datei in usb gefunden ")           
             Lcd.mlines("Konfig Datei  gefunden")
             return true
            else
+             log (" keine config datei in usb gefunden ")           
             Lcd.mlines("config.json     NICHT gefunden!")           
            end
          else
@@ -386,7 +392,8 @@ module HeatController
         # wait for lcd server to go up
         wait_for_lcd_server
         ConfigReader.read_config_file
-        ConfigReader.reload_config  if ConfigReader.detect_usb_drive         
+        ConfigReader.reload_config  if ConfigReader.detect_usb_drive
+                 
         Wiringpi.wiringPiSetup
         RelaisCard.init       
       end      
