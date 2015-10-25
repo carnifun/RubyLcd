@@ -82,7 +82,7 @@ module RubyLcd
       log("Lcd Server gestartet")
       RubyLcd.print({text:"LCD Display ist   Bereit"})
       ip = nil
-      5.times do |i|
+      2.times do |i|
         ip = get_ip
         if (ip)
           RubyLcd.print({text:"IP:             #{ip}"})
@@ -90,7 +90,7 @@ module RubyLcd
         else
           RubyLcd.print({text:"Warte auf       Netzwerk#{ '.' * (i+1) }"})
         end
-        sleep(5)
+        sleep(2)
         break if ip
       end
       RubyLcd.print({text:"Kein  Netzwerk"}) unless ip
