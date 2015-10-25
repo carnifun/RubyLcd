@@ -35,3 +35,5 @@ build/
 .rvmrc
 /heatcontroll
 /log
+/config/*.md5
+/config/config.json
