@@ -232,8 +232,8 @@ module HeatController
             Lcd.mlines("config.json     NICHT gefunden!")           
            end
          else
-           Lcd.mlines("Kein Usb erkannt")
-           sleep(5)           
+           #Lcd.mlines("Kein Usb erkannt")
+           #sleep(5)           
          end
          false
         end    
@@ -246,7 +246,15 @@ module HeatController
   class MainController
     class << self
       @sensor_data=[]            
-      def fallback_programm
+      def fallback_programm(actuator = nil)
+        config = ConfigReader.config
+        actuators = config[:actuators]
+        actuators = [actuator] if !actuator.nil?         
+        actuators.each do | act |
+          RelaisCard.send(act[:fallback_state], act[:channel])
+        end
+      end
+      def _fallback_programm
         config = ConfigReader.config
         config[:actuators].each do | actuator |
           RelaisCard.send(actuator[:fallback_state], actuator[:channel])
@@ -271,8 +279,12 @@ module HeatController
         last_sensor_data = sensor_data = @sensor_data.last 
         last_sensor_data = @sensor_data.last(2).first if @sensor_data.length > 1 
         config[:sensors].each do | s |
-          variation = (sensor_data[s[:id]] - last_sensor_data[s[:id]] ) > 0.0 ? "+" : "-"	
-          status +="#{s[:name]}:+#{sprintf('%.2f',sensor_data[s[:id]])} C #{variation}".to_16          
+          variation = (sensor_data[s[:id]] - last_sensor_data[s[:id]] ) > 0.0 ? "+" : "-"
+          if sensor_data[s[:id]]>0
+            status +="#{s[:name]}:+#{sprintf('%.2f',sensor_data[s[:id]])} C #{variation}".to_16
+          else
+            status +="#{s[:name]}: ERROR ".to_16            
+          end
         end
         
         config[:actuators].each do | actuator |
@@ -351,6 +363,15 @@ module HeatController
         end
         false        
       end
+      def no_faulty_sensor_detected?(rule)
+        conditions = rule[:and_conditions]
+        conditions += rule[:or_conditions] if !rule[:or_conditions].nil?
+        conditions.each do | c |
+          s_id = sensor_name_to_id(c[:sensor])
+          return false if @sensor_data.last[s_id] < 1 
+        end
+        true 
+      end
       def perform_action (actuator, action)
         #puts "performing action#{action}"
         excecuted = RelaisCard.send(action, actuator[:channel])
@@ -362,7 +383,7 @@ module HeatController
         end
       end
       def init
-	@sensor_data=[]
+	     @sensor_data=[]
         # wait for lcd server to go up
         wait_for_lcd_server
         ConfigReader.read_config_file
@@ -371,8 +392,8 @@ module HeatController
         RelaisCard.init       
       end      
       def touch_pid_file
-	require "fileutils"
-	FileUtils.touch("/heatcontroll/tmp/heatcontroll.pid")
+	     require "fileutils"
+	     FileUtils.touch("/heatcontroll/tmp/heatcontroll.pid")
       end		
       def run
         # main loop
@@ -380,25 +401,28 @@ module HeatController
         init
         config = ConfigReader.config
         loop do
+          
           if read_temperature
-            Led.okay
-            # get the rules 
-            config[:actuators].each do | actuator |
-              actuator[:rules].each do | rule |
-                perform_action(actuator, rule[:action]) if rule_fullfilled(rule)
-              end          
-            end
+            Led.okay          
           else
-            Led.error
-            #wait for error message to be shown 
-            sleep(5)
-            Lcd.sline("Notlauf Progr.", 2)
-            fallback_programm
-            sleep(5)
+            Led.warning
           end
+          # get the rules 
+          config[:actuators].each do | actuator |
+            actuator[:rules].each do | rule |                                 
+              if no_faulty_sensor_detected?(rule)         
+                perform_action(actuator, rule[:action]) if rule_fullfilled(rule)
+              else
+                fallback_programm(actuator)
+                break;
+              end
+            end          
+          end      
+          
           update_status
           sleep(MAIN_LOOP_INTERVALL)
-	  touch_pid_file	
+          ConfigReader.reload_config  if ConfigReader.detect_usb_drive         
+	        touch_pid_file	
         end        
       end  
     end
