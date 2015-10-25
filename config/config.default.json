@@ -1,22 +1,87 @@
-{	
+{
+	"_network": {
+		"ssid": "your_ssid",
+		"psk": "your_passwork"
+	},	
+	"mirko_sensors": [
+		{
+			"name": "S1",
+			"description": "Sensor an der Therme 1 ",
+			"id": "10-000802c68099"
+		}, {
+			"name": "S2",
+			"description": "Sensor am uv-pumpe 2 ",
+			"id": "10-000802bf0598"
+		}
+	],
 	"sensors": [
 		{
-			"name": "s1",
+			"name": "S1",
 			"description": "Sensor an der Therme 1 ",
 			"id": "28-011581c21fff"
 		}, {
-			"name": "s2",
+			"name": "S2",
 			"description": "Sensor am uv-pumpe 2 ",
 			"id": "28-0115811daeff"
 		}, {  
-			"name": "s3",
+			"name": "S3",
 			"description": "Sensor am uv-pumpe 2 ",
 			"id": "28-011581c31aff"
-		}
-	],
+		}],
 	"actuators": [
 		{
 			"name": "UWP-1",
+			"channel": "1",
+			"fallback_state": "on",
+			"rules": [
+				{
+					"action": "on",
+					"and_conditions": [
+						{
+							"sensor": "S1",
+							"comparator": ">",
+							"value": "24"
+						}
+					]
+				}, {
+					"action": "off",
+					"and_conditions": [
+						{
+							"sensor": "S1",
+							"comparator": "<",
+							"value": "24"
+						}
+					]
+				}
+			]
+			
+		}, {
+			"name": "UWP-2",
+			"channel": "2",
+			"fallback_state": "off",
+			"rules": [
+				{
+					"action": "on",
+					"and_conditions": [
+						{
+							"sensor": "S2",
+							"comparator": ">",
+							"value": "26"
+						}
+					]
+				}, {
+					"action": "off",
+					"and_conditions": [
+						{
+							"sensor": "S2",
+							"comparator": "<",
+							"value": "24"
+						}
+					]
+				}
+			]
+		}, {
+			"name": "UWP-3",
 			"channel": "4",
 			"fallback_state": "on",
 			"rules": [
@@ -24,73 +89,18 @@
 					"action": "on",
 					"and_conditions": [
 						{
-							"sensor": "s1",
+							"sensor": "S3",
 							"comparator": ">",
-							"value": "19"
-						}, {
-							"sensor": "s2",
-							"comparator": ">",
-							"value": "25"
+							"value": "28"
 						}
 					]
 				}, {
 					"action": "off",
 					"and_conditions": [
 						{
-							"sensor": "s2",
+							"sensor": "S3",
 							"comparator": "<",
-							"value": "25"
-						}
-					]
-				}
-			]
-		}, {
-			"name": "UWP-2",
-			"channel": "2",
-			"fallback_state": "off",
-			"rules": [
-				{
-					"action": "off",
-					"and_conditions": [
-						{
-							"sensor": "s2",
-							"comparator": "<",
-							"value": "22"
-						}
-					]
-				}, {
-					"action": "on",
-					"and_conditions": [
-						{
-							"sensor": "s2",
-							"comparator": ">",
-							"value": "25"
-						}
-					]
-				}
-			]
-		}
-	],{
-			"name": "UWP-3",
-			"channel": "3",
-			"fallback_state": "off",
-			"rules": [
-				{
-					"action": "off",
-					"and_conditions": [
-						{
-							"sensor": "s3",
-							"comparator": "<",
-							"value": "22"
-						}
-					]
-				}, {
-					"action": "on",
-					"and_conditions": [
-						{
-							"sensor": "s3",
-							"comparator": ">",
-							"value": "22"
+							"value": "28"
 						}
 					]
 				}

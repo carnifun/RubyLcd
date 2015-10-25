@@ -82,6 +82,32 @@
 			]
 		}, {
 			"name": "UWP-3",
+			"channel": "3",
+			"fallback_state": "on",
+			"rules": [
+				{
+					"action": "on",
+					"and_conditions": [
+						{
+							"sensor": "S3",
+							"comparator": ">",
+							"value": "28"
+						}
+					]
+				}, {
+					"action": "off",
+					"and_conditions": [
+						{
+							"sensor": "S3",
+							"comparator": "<",
+							"value": "28"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "UWP-4",
 			"channel": "4",
 			"fallback_state": "on",
 			"rules": [
