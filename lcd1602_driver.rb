@@ -234,12 +234,13 @@ module RubyLcd
       end
       
       def sleep_or_exit ( wait_s )
-         step = 1 / 10
+         step = 1.0 / 10.0
          t = 0  
           loop do 
             Thread.exit if Thread.current["STOP"]
             break if t >= wait_s  
-            t += step 
+            t += step            
+            sleep(step)
           end        
       end
       def print_single_line (args)

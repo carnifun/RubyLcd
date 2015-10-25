@@ -417,7 +417,6 @@ module HeatController
               end
             end          
           end      
-          
           update_status
           sleep(MAIN_LOOP_INTERVALL)
           ConfigReader.reload_config  if ConfigReader.detect_usb_drive         
