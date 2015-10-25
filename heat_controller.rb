@@ -182,14 +182,7 @@ module HeatController
         end
       end
       def reload_config
-        require 'digest/md5'      
-        content = File.read("/media/usb/config.json")
-        md5 = Digest::MD5.hexdigest(content)
-        if File.exists?(File.join(APP_ROOT, "config","#{md5}.md5"))       
-          log("Konfiguration ist breits aktuell")
-          #sleep(3)
-          return  
-        end
+        content = File.read("/media/usb/config.json")       
         if json_from_content(content).nil?
           Lcd.mlines("Konfiguration    ist FEHLERHAFT")
           sleep(2)
@@ -197,10 +190,6 @@ module HeatController
         end
         Lcd.mlines("Lade neue     Konfiguration ")
         sleep(4)
-
-        File.open(File.join(APP_ROOT, "config","#{md5}.md5"), "w+") do |f |
-          f.puts content
-        end
         File.open(File.join(APP_ROOT, "config","config.json"), "w+") do |f |
           f.puts content
         end
