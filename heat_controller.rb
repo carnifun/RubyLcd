@@ -198,7 +198,7 @@ module HeatController
         Lcd.mlines("Lade neue     Konfiguration ")
         sleep(4)
 
-        File.open(File.join(APP_ROOT, "config",md5), "w+") do |f |
+        File.open(File.join(APP_ROOT, "config","#{md5}.md5"), "w+") do |f |
           f.puts content
         end
         File.open(File.join(APP_ROOT, "config","config.json"), "w+") do |f |
