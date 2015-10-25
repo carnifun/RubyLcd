@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-APP_ROOT = "/mnt/win"
+APP_ROOT = "/heatcontroll"
 load "#{APP_ROOT}/logger.rb"
 load "#{APP_ROOT}/lcd1602_driver.rb"
 
