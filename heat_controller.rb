@@ -136,11 +136,10 @@ module HeatController
       
       def update_network_setting
         return false unless @config[:network]
-        int_file = "/etc/network/interfaces"
-        #int_file = "/home/pi/interfaces"
+        int_file = "/etc/wpa_supplicant/wpa_supplicant.conf_back"
         content = File.read(int_file) 
-        content = content.gsub(/wpa-ssid.*/, "wpa-ssid \"#{@config[:network][:ssid]}\"")
-        content = content.gsub(/wpa-psk.*/, "wpa-psk \"#{@config[:network][:psk]}\"")
+        content = content.gsub(/ssid=.*/, "ssid=\"#{@config[:network][:ssid]}\"")
+        content = content.gsub(/psk=.*/, "psk=\"#{@config[:network][:psk]}\"")
         f = File.open(int_file, "w+")
         f.puts content
         f.close
