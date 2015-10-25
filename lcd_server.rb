@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-APP_ROOT = "/heatcontroll"
+APP_ROOT = "/mnt/win"
 load "#{APP_ROOT}/logger.rb"
 load "#{APP_ROOT}/lcd1602_driver.rb"
 
@@ -41,7 +41,7 @@ module RubyLcd
     
     def run
       return if @object.nil?
-      Server.kill_others()
+      Server.gracefull_stop_others()
       if @object[:single_line]
         @object[:extra_text] ||= get_extra_text(@object[:single_line]) 
       end
@@ -63,9 +63,13 @@ module RubyLcd
     def threads
       @threads || [] 
     end
-    def self.kill_others
+    def self.gracefull_stop_others
       @threads.each do |t|
-          Thread.kill t if (t.object_id != Thread.current.object_id)           
+        if (t.object_id != Thread.current.object_id)     
+           t["STOP"] = Time.now.to_s
+           # wait until thred exit 
+           t.value           
+         end     
       end if !@threads.nil?
       @threads = [Thread.current]
     end

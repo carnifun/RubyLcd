@@ -1,10 +1,20 @@
 module RubyLcd
   class Client
     require 'socket'
-   def self.send request 
+    def self.send request 
       socket = TCPSocket.open("127.0.0.1","2010")
       socket.print(request)               # Send request
       socket.close
+    end
+    
+    def self.do(msg="default pages multiline message from client")
+      puts " start"
+      socket = TCPSocket.open("localhost","5000")
+      socket.print("hello\n")
+      puts " hello written "
+      sleep(1)
+      socket.close
+      #puts response
     end
     #def self.method_missing(method_name, *arguments, &block)
     #  puts "needs this class method#{method_name}"
@@ -113,7 +123,7 @@ module RubyLcd
       socket.close
       #puts response
     end
-    
+
     
   end
 end

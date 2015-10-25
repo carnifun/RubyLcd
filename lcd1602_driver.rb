@@ -163,6 +163,7 @@ module RubyLcd
         write(byte[4..7].to_i(2))
         
         @@charCount += 1
+        Thread.exit if Thread.current["STOP"]        
       end
 
       def cls()
@@ -227,9 +228,19 @@ module RubyLcd
           l.each_byte do | b |
               write_char(b.to_s(2))
           end        
-        end
+        end                
         #@@string_buffer ||=[]
         #@@string_buffer << string        
+      end
+      
+      def sleep_or_exit ( wait_s )
+         step = 1 / 10
+         t = 0  
+          loop do 
+            Thread.exit if Thread.current["STOP"]
+            break if t >= wait_s  
+            t += step 
+          end        
       end
       def print_single_line (args)
                 
@@ -247,12 +258,12 @@ module RubyLcd
           line = line.to_40          
           line = (args[:single_line] == TOP_ROW) ? line + extra_text : extra_text + line   
           write_string(line)
-          sleep(1) if start_pos == 0
+          sleep_or_exit(1) if start_pos == 0
           start_pos +=1
           if start_pos >= end_pos
             start_pos = 0
           end 
-          sleep(0.8)
+          sleep_or_exit(0.8)
           break if text.size <16
         end        
       end
@@ -268,7 +279,7 @@ module RubyLcd
         loop do 
           pages.each do | page_text |
             write_string(page_text)
-            sleep(PAGES_VIEW_INTERVALL)          
+            sleep_or_exit(PAGES_VIEW_INTERVALL)          
             break if pages.size == 1
           end
           break if args[:flash] || pages.size == 1
