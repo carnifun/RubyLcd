@@ -2,7 +2,18 @@
 	"_network": {
 		"ssid": "your_ssid",
 		"psk": "your_passwork"
-	},
+	},	
+	"mirko_sensors": [
+		{
+			"name": "S1",
+			"description": "Sensor an der Therme 1 ",
+			"id": "10-000802c68099"
+		}, {
+			"name": "S2",
+			"description": "Sensor am uv-pumpe 2 ",
+			"id": "10-000802bf0598"
+		}
+	],
 	"sensors": [
 		{
 			"name": "S1",
