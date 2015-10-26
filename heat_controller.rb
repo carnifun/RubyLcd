@@ -171,8 +171,7 @@ module HeatController
         Led.loading
         init
         config = ConfigReader.config
-        loop do
-          
+        loop do          
           if read_temperature
             Led.okay          
           else
@@ -191,12 +190,16 @@ module HeatController
           end      
           update_status
           sleep(MAIN_LOOP_INTERVALL)
-	        touch_pid_file	
+	        touch_pid_file
+          ConfigReader.reload_config  if ConfigReader.detect_usb_drive	        	
         end        
       end  
     end
   end
 end
+
+
+
 Signal.trap('INT') do|_signo|
   HeatController::MainController.fallback_programm
   exit(0)

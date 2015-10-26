@@ -15,7 +15,10 @@ module HeatController
         true
       end
       def read_config_file(new_file=false)
-          @config = json_from_file(File.join(APP_ROOT, "config","config.json")) 
+          log "Reading Config File "
+          @config = json_from_file(File.join(APP_ROOT, "config","config.json"))
+          log "Configuration = #{@config} "
+          log "======================================= "           
           if @config.nil? 
             Lcd.mlines("lade default".to_16 + "Configuration")          
             sleep(5)
@@ -26,7 +29,7 @@ module HeatController
               exit()
             end
           end
-          if new_file            
+          if new_file && false
             if update_network_setting
               Lcd.mlines("System Reboot".to_16+  "Usb entfernen.")
               sleep(5)
@@ -50,17 +53,22 @@ module HeatController
         end
       end
       def reload_config
+        log " getting new Configuration "
         content = File.read("/media/usb/config.json")       
         if json_from_content(content).nil?
           Lcd.mlines("Konfiguration    ist FEHLERHAFT")
+          log " Json error Configuration "
           sleep(2)
           return 
         end
+        log " Json Configuration is Okay #{content}"
         Lcd.mlines("Lade neue     Konfiguration ")
         sleep(4)
-        File.open(File.join(APP_ROOT, "config","config.json"), "w+") do |f |
-          f.puts content
-        end
+        log " Writing new file "
+        f = File.open(File.join(APP_ROOT, "config","config.json"), "w+")
+        f.puts content
+        f.close
+        log " Writing new file  Finisched "
         read_config_file(true)
       end
       def detect_usb_drive
