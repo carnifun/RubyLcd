@@ -7,6 +7,8 @@ module RubyLed
   ON = 0
   OFF = 1
   class Led 
+    
+    
     require 'wiringpi'
     class << self
       P_RED = 0 # GPIO 17 / pin 11
