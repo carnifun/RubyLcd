@@ -65,6 +65,7 @@ module HeatController
         Lcd.mlines("Lade neue     Konfiguration ")
         sleep(4)
         log " Writing new file "
+        
         f = File.open(File.join(APP_ROOT, "config","config.json"), "w+")
         f.puts content
         f.close
@@ -86,7 +87,11 @@ module HeatController
            Lcd.mlines("Usb erkannt")
            sleep(1)         
            system("unmount /media/usb")
+           sleep(1)         
+           system("eject /media/usb")
+           sleep(5)
            system("mount #{usb_path} /media/usb")
+           sleep(2)
            Lcd.mlines("Usb-media       Wird gelesen")
            sleep(2)
            if File.exists?("/media/usb/config.json")           
