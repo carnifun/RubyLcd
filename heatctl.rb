@@ -4,7 +4,7 @@
 
 #APP_ROOT = File.dirname(__FILE__)
 APP_ROOT = "/heatcontroll"
-LOG_PATH= "#{APP_ROOT}/log"
+LOG_PATH= "#{APP_ROOT}/tmp"
 
 
 
