@@ -73,6 +73,7 @@ module HeatController
         read_config_file(true)
       end
       def detect_usb_drive
+        require "fileutils"
          # first check if we have the sda? directory 
          usb_path = ""
          Dir["/dev/disk/by-uuid/*"].each do | f |
@@ -98,7 +99,7 @@ module HeatController
             Lcd.mlines("Konfig Datei  gefunden")
             sleep(5)
             log (" copy file from usb to drive ")
-            require "fileutils"
+
             FileUtils.cp("media/usb/config.json", "/heatcontroll/config/newfile")
             return true
            else
