@@ -191,7 +191,6 @@ module HeatController
           update_status
           sleep(MAIN_LOOP_INTERVALL)
 	        touch_pid_file
-          ConfigReader.reload_config  if ConfigReader.detect_usb_drive	        	
         end        
       end  
     end

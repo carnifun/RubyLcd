@@ -96,6 +96,10 @@ module HeatController
            sleep(2)
            if File.exists?("/media/usb/config.json")           
             Lcd.mlines("Konfig Datei  gefunden")
+            sleep(5)
+            log (" copy file from usb to drive ")
+            require "fileutils"
+            FileUtils.cp("media/usb/config.json", "/heatcontroll/config/newfile")
             return true
            else
             Lcd.mlines("config.json     NICHT gefunden!")           
