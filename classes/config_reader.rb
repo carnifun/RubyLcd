@@ -100,7 +100,7 @@ module HeatController
             sleep(5)
             log (" copy file from usb to drive ")
 
-            FileUtils.cp("media/usb/config.json", "/heatcontroll/config/newfile")
+            FileUtilsd.cp("/media/usb/config.json", "/heatcontroll/config/newfile")
             return true
            else
             Lcd.mlines("config.json     NICHT gefunden!")           
