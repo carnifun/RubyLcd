@@ -1,8 +1,8 @@
 #!/usr/bin/ruby
 
 APP_ROOT = "/heatcontroll"
-load "#{APP_ROOT}/logger.rb"
-load "#{APP_ROOT}/lcd1602_driver.rb"
+load "#{APP_ROOT}/classes/logger.rb"
+load "#{APP_ROOT}/driver/lcd1602_driver.rb"
 
 
 module RubyLcd
