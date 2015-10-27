@@ -194,6 +194,7 @@ module HeatController
           update_status
           sleep(MAIN_LOOP_INTERVALL)
 	        touch_pid_file
+	        log "main loop"
         end        
       end  
     end

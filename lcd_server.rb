@@ -67,8 +67,10 @@ module RubyLcd
       @threads.each do |t|
         if (t.object_id != Thread.current.object_id)     
            t["STOP"] = Time.now.to_s
+           log ("STOP SIGNAL SET for Thread #{t.object_id} we must wait ")
            # wait until thred exit 
            t.value           
+           log ("Finisched Waiting  ")
          end     
       end if !@threads.nil?
       @threads = [Thread.current]
@@ -115,7 +117,7 @@ end
 
 
 Signal.trap('INT') do|_signo|
-  RubyLcd.driver.init
+  #RubyLcd.driver.init
 end
 Signal.trap('KILL') do|_signo|
   RubyLcd.clear

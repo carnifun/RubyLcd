@@ -163,6 +163,7 @@ module RubyLcd
         write(byte[4..7].to_i(2))
         
         @@charCount += 1
+        log "Stop im Driver detected Exiting" if Thread.current["STOP"]        
         Thread.exit if Thread.current["STOP"]        
       end
 
@@ -237,6 +238,7 @@ module RubyLcd
          step = 1.0 / 10.0
          t = 0  
           loop do 
+            log "Stop im Driver detected " if Thread.current["STOP"]
             Thread.exit if Thread.current["STOP"]
             break if t >= wait_s  
             t += step            
