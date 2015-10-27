@@ -83,6 +83,7 @@ module HeatController
             break;
            end  
          end
+
          
          if File.exists?(usb_path)
            #puts "dir found "
