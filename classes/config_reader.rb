@@ -77,6 +77,7 @@ module HeatController
          # first check if we have the sda? directory 
          usb_path = ""
          Dir["/dev/disk/by-uuid/*"].each do | f |
+           puts File.realpath(f)
            if  File.realpath(f).match(/\/dev\/sd[a-z]\d/)
             usb_path = f 
             break;
@@ -88,14 +89,15 @@ module HeatController
            Lcd.mlines("Usb erkannt")
            sleep(1)         
            system("unmount /media/usb")
-           sleep(1)         
-           system("eject /media/usb")
+           log (" Unmounting usb ")
            sleep(5)
+           log (" mounting usb ")           
            system("mount #{usb_path} /media/usb")
            sleep(2)
            Lcd.mlines("Usb-media       Wird gelesen")
            sleep(2)
            if File.exists?("/media/usb/config.json")           
+            log (" Config file on  usb Found ")           
             Lcd.mlines("Konfig Datei  gefunden")
             sleep(5)
             log(" copy file from usb to drive ")
