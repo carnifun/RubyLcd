@@ -3,6 +3,7 @@
 APP_ROOT = "/heatcontroll"
 load "#{APP_ROOT}/classes/logger.rb"
 load "#{APP_ROOT}/driver/lcd1602_driver.rb"
+#load "/mnt/win/driver/lcd1602_driver.rb"
 
 
 module RubyLcd
@@ -57,28 +58,22 @@ module RubyLcd
 
   class Server
     require 'socket'
-    require 'thread'
     
     STATUS_INTERUPT = 1
-    def threads
-      @threads || [] 
-    end
-    def self.gracefull_stop_others
-      @threads.each do |t|
-        if (t.object_id != Thread.current.object_id)     
-           t["STOP"] = Time.now.to_s
-           log ("STOP SIGNAL SET for Thread #{t.object_id} we must wait ")
-           # wait until thred exit 
-           t.value           
-           log ("Finisched Waiting  ")
-         end     
-      end if !@threads.nil?
-      @threads = [Thread.current]
-    end
+    MAIN_WAIT_INTERVAL = 0.3
+
     def self.get_ip
        a =  Socket.ip_address_list.detect{|intf| intf.ipv4_private?}
        return a.ip_address unless a.nil?
        nil
+    end
+    def self.file_changed?      
+      t = File.mtime("/heatcontroll/tmp/lcd_file")
+      (@last_modification != t)              
+    end
+    def self.read_file
+      @last_modification = File.mtime("/heatcontroll/tmp/lcd_file") 
+      File.read("/heatcontroll/tmp/lcd_file")
     end
     def self.start
       log("Lcd Server gestartet")
@@ -96,37 +91,22 @@ module RubyLcd
         break if ip
       end
       RubyLcd.print({text:"Kein  Netzwerk"}) unless ip
-      @threads = []
-      Thread::abort_on_exception = true  
-      server = TCPServer.new("localhost", 2000)  # Server bind to port 2000
-      loop {
-        @threads << Thread.start(server.accept) do |client|
-            message = client.gets
-            #puts "server got message #{message} "
-            if !message.nil?
-              r = Request.new(message)
-              r.run unless r.nil?
-              #client.puts "responce"
-            end
-            client.close
+      f = File.open("/heatcontroll/tmp/lcd_file", "w+")
+      f.puts " STARTEN "
+      f.close
+      
+      
+      loop do 
+        if file_changed?
+          message = read_file
+          RubyLcd.print(message)          
         end
-      }.join
+        sleep(MAIN_WAIT_INTERVAL)    
+      end
     end
   end
 end
 
 
-Signal.trap('INT') do|_signo|
-  #RubyLcd.driver.init
-end
-Signal.trap('KILL') do|_signo|
-  RubyLcd.clear
-  exit(0)
-end
-
-Signal.trap('TERM') do|_signo|
-  RubyLcd.clear
-  exit(0)
-end
 RubyLcd::Server.start
 

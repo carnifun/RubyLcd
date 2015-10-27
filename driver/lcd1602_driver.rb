@@ -164,7 +164,7 @@ module RubyLcd
         
         @@charCount += 1
         log "Stop im Driver detected Exiting" if Thread.current["STOP"]        
-        Thread.exit if Thread.current["STOP"]        
+        Thread.current.kill if Thread.current["STOP"]        
       end
 
       def cls()
@@ -235,15 +235,15 @@ module RubyLcd
       end
       
       def sleep_or_exit ( wait_s )
-         step = 1.0 / 10.0
-         t = 0  
+         step = RubyLcd::Server::MAIN_WAIT_INTERVAL
+         t = 0 
           loop do 
-            log "Stop im Driver detected " if Thread.current["STOP"]
-            Thread.exit if Thread.current["STOP"]
+            return true if RubyLcd::Server.file_changed? 
             break if t >= wait_s  
             t += step            
             sleep(step)
-          end        
+          end
+          false
       end
       def print_single_line (args)
                 
@@ -261,12 +261,14 @@ module RubyLcd
           line = line.to_40          
           line = (args[:single_line] == TOP_ROW) ? line + extra_text : extra_text + line   
           write_string(line)
-          sleep_or_exit(1) if start_pos == 0
+          if start_pos == 0
+            break if sleep_or_exit(1)             
+          end
           start_pos +=1
           if start_pos >= end_pos
             start_pos = 0
           end 
-          sleep_or_exit(0.8)
+          break if sleep_or_exit(0.8)
           break if text.size <16
         end        
       end
@@ -279,14 +281,19 @@ module RubyLcd
         pages = lines.each_slice(2).map do | top_line, bottom_line |
           top_line + bottom_line
         end
+        exit_loop = false
         loop do 
           pages.each do | page_text |
             write_string(page_text)
-            sleep_or_exit(PAGES_VIEW_INTERVALL)          
+            exit_loop = sleep_or_exit(PAGES_VIEW_INTERVALL)
+            puts "exit_loop #{exit_loop}"          
+            break if exit_loop
             break if pages.size == 1
           end
-          break if args[:flash] || pages.size == 1
+          break if (args[:flash] || pages.size == 1 || exit_loop)
+          puts " Done #{exit_loop}"
         end        
+        puts " Bin raus "
       end
       def print (args)
         args = {text: args} if args.is_a?(String)
