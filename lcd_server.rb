@@ -68,12 +68,12 @@ module RubyLcd
        nil
     end
     def self.file_changed?      
-      t = File.mtime("/heatcontroll/tmp/lcd_file")
+      t = File.mtime("/heatcontroll/lcd_tmp/lcd_file")
       (@last_modification != t)              
     end
     def self.read_file
-      @last_modification = File.mtime("/heatcontroll/tmp/lcd_file") 
-      File.read("/heatcontroll/tmp/lcd_file")
+      @last_modification = File.mtime("/heatcontroll/lcd_tmp/lcd_file") 
+      File.read("/heatcontroll/lcd_tmp/lcd_file")
     end
     def self.start
       log("Lcd Server gestartet")
@@ -91,7 +91,7 @@ module RubyLcd
         break if ip
       end
       RubyLcd.print({text:"Kein  Netzwerk"}) unless ip
-      f = File.open("/heatcontroll/tmp/lcd_file", "w+")
+      f = File.open("/heatcontroll/lcd_tmp/lcd_file", "w+")
       f.puts " STARTEN "
       f.close
       

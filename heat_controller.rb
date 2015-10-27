@@ -161,7 +161,7 @@ module HeatController
       def init
 	     @sensor_data=[]
         # wait for lcd server to go up
-        wait_for_lcd_server
+        # wait_for_lcd_server
         ConfigReader.read_config_file
         ConfigReader.reload_config  if ConfigReader.detect_usb_drive
         RelaisCard.init       

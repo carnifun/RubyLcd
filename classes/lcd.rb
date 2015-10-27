@@ -4,7 +4,7 @@ module HeatController
     
     def self.lcd_file
       return @lcd_file unless @lcd_file.nil?
-      @lcd_file = File.open("/heatcontroll/tmp/lcd_file", "w+") 
+      @lcd_file = File.open("/heatcontroll/lcd_tmp/lcd_file", "w+") 
     end
     
     def self.sline(msg, row = 1 )
@@ -14,6 +14,9 @@ module HeatController
     def self.mlines(msg)
       lcd_file.truncate(0)
       lcd_file.puts(msg)
+      lcd_file.fsync	
+#	lcd_file.close
+#@lcd_file = nil
     end
          
 
