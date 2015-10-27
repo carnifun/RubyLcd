@@ -54,22 +54,21 @@ module HeatController
       end
       def reload_config
         log " getting new Configuration "
-        content = File.read("/media/usb/config.json")       
+        # content = File.read("/media/usb/config.json")
+        content = File.read(File.join(APP_ROOT, "config","config.json.new"))
         if json_from_content(content).nil?
           Lcd.mlines("Konfiguration    ist FEHLERHAFT")
-          log " Json error Configuration "
+          log " Json error Configuration "          
           sleep(2)
           return 
         end
-        log " Json Configuration is Okay #{content}"
-        Lcd.mlines("Lade neue     Konfiguration ")
+        log " Json Configuration is Okay "
+        Lcd.mlines("Lade neue       Konfiguration ")
         sleep(4)
-        log " Writing new file "
-        
-        f = File.open(File.join(APP_ROOT, "config","config.json"), "w+")
-        f.puts content
-        f.close
-        log " Writing new file  Finisched "
+        log " renaming files  "
+        src = File.join(APP_ROOT, "config","config.json.new")
+        target = File.join(APP_ROOT, "config","config.json")        
+        log " Copy Config file  Finisched "
         read_config_file(true)
       end
       def detect_usb_drive
@@ -95,14 +94,14 @@ module HeatController
            log (" mounting usb ")           
            system("mount -t vfat -o rw #{usb_path} /media/usb")
            sleep(2)
-           Lcd.mlines("Usb-media       Wird gelesen")
+           Lcd.mlines("Usb-media Wird gelesen")
            sleep(2)
            if File.exists?("/media/usb/config.json")           
             log (" Config file on  usb Found ")           
             Lcd.mlines("Konfig Datei  gefunden")
             sleep(5)
             log(" copy file from usb to drive ")
-            FileUtils.cp("/media/usb/config.json", "/heatcontroll/config/newfile")
+            FileUtils.cp("/media/usb/config.json", "/heatcontroll/config/config.json.new")
             return true
            else
             Lcd.mlines("config.json     NICHT gefunden!")           
