@@ -13,7 +13,7 @@ end
 APP_ROOT = "/heatcontroll"
 Dir["#{APP_ROOT}/classes/*.rb"].each {|f| load f}
 
-SIM_MODE = true
+SIM_MODE = false
 
 module HeatController 
   MAIN_LOOP_INTERVALL = 15
