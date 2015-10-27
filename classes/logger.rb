@@ -10,7 +10,7 @@ APP_ROOT ||= "/heatcontroll"
       end
       def init
         return if initialized?
-        @@logger_handler =  File.open(File.join(APP_ROOT, "log","debug.log"), "a")         
+        @@logger_handler =  File.open(File.join(APP_ROOT, "tmp","debug.log"), "a")         
         @@initialized = true
       end
       def logger_handler 
