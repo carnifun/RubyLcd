@@ -2,7 +2,8 @@ module HeatController
   
   class Led
     require 'socket'
-    def self.tcp_send request 
+    def self.tcp_send request
+      return true if SIM_MODE 
       begin
         socket = TCPSocket.open("127.0.0.1","2010") 
         socket.print(request)               # Send request

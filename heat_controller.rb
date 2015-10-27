@@ -13,6 +13,8 @@ end
 APP_ROOT = "/heatcontroll"
 Dir["#{APP_ROOT}/classes/*.rb"].each {|f| load f}
 
+SIM_MODE = true
+
 module HeatController 
   MAIN_LOOP_INTERVALL = 15
   class MainController
@@ -92,6 +94,7 @@ module HeatController
        end
       end
       def wait_for_lcd_server
+        return if SIM_MODE
         loop do
           begin 
             s = Lcd.sline("Lcd server up")
@@ -168,7 +171,7 @@ module HeatController
       end		
       def run
         # main loop
-        Led.loading
+        Led.loading 
         init
         config = ConfigReader.config
         loop do          
