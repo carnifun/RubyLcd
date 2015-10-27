@@ -17,7 +17,7 @@ module HeatController
       def read_config_file(new_file=false)
           log "Reading Config File "
           @config = json_from_file(File.join(APP_ROOT, "config","config.json"))
-          log "Configuration = #{@config} "
+          log "Reading Configuration file  "
           log "======================================= "           
           if @config.nil? 
             Lcd.mlines("lade default".to_16 + "Configuration")          
@@ -39,8 +39,7 @@ module HeatController
           end
         end
       def json_from_file ( file )
-        log " loading #{file}"
-
+        log "Loading #{file}"
         content = File.read(file) if File.exists?(file)
         json_from_content(content) unless content.nil?
       end  
@@ -53,7 +52,7 @@ module HeatController
         end
       end
       def reload_config
-        log " getting new Configuration "
+        log "Getting new Configuration "
         # content = File.read("/media/usb/config.json")
         content = File.read(File.join(APP_ROOT, "config","config.json.new"))
         if json_from_content(content).nil?
@@ -67,8 +66,9 @@ module HeatController
         sleep(4)
         log " renaming files  "
         src = File.join(APP_ROOT, "config","config.json.new")
-        target = File.join(APP_ROOT, "config","config.json")        
-        log " Copy Config file  Finisched "
+        target = File.join(APP_ROOT, "config","config.json")
+        FileUtils.cp(src, target)
+        log "Copy Config filee  Finisched "
         read_config_file(true)
       end
       def detect_usb_drive
