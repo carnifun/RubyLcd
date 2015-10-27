@@ -89,11 +89,11 @@ module HeatController
            #puts "dir found "
            Lcd.mlines("Usb erkannt")
            sleep(1)         
-           system("unmount /media/usb")
+           system("umount /media/usb")
            log (" Unmounting usb ")
            sleep(5)
            log (" mounting usb ")           
-           system("mount #{usb_path} /media/usb")
+           system("mount -t vfat -o rw #{usb_path} /media/usb")
            sleep(2)
            Lcd.mlines("Usb-media       Wird gelesen")
            sleep(2)
