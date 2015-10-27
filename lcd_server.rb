@@ -91,9 +91,11 @@ module RubyLcd
         break if ip
       end
       RubyLcd.print({text:"Kein  Netzwerk"}) unless ip
+      sleep(2)
       f = File.open("/heatcontroll/lcd_tmp/lcd_file", "w+")
       f.puts " STARTEN "
       f.close
+      sleep(2)
       
       
       loop do 
