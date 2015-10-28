@@ -233,7 +233,7 @@ module RubyLcd
       end
 
       def sleep_or_exit(wait_s)
-        step = RubyLcd::Server::MAIN_WAIT_INTERVAL
+        step = 0.2
         t = 0
         loop do
           Thread.current.kill if Thread.current['KILL']

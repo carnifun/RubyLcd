@@ -37,6 +37,7 @@ module RubyLcd
     end
 
     def run
+	puts "got message #{@object}" 
       Server.gracefull_stop_others
       sleep(0.2)
       Thread.current.kill if Thread.current['KILL']
@@ -92,7 +93,7 @@ module RubyLcd
       Thread.abort_on_exception = true
       server = TCPServer.new('localhost', 2000) # Server bind to port 2000
       loop do
-        @threads << Thread.start(server.accept) do |client|
+         Thread.start(server.accept) do |client|
           message = client.gets
           # puts "server got message #{message} "
           unless message.nil?
