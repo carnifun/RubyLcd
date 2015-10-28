@@ -207,14 +207,12 @@ nfig = ConfigReader.config
         init
         config = ConfigReader.config
         loop do
-puts "enter loop" 
           if read_temperature
             Led.okay
           else
             Led.warning
           end
           # get the rules
-puts " getting rules"
           config[:actuators].each do |actuator|
             actuator[:rules].each do |rule|
               if no_faulty_sensor_detected?(rule)
