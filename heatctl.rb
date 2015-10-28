@@ -1,80 +1,72 @@
 #!/usr/bin/ruby
 
-# start the heat Controller Main programm and server 
+# start the heat Controller Main programm and server
 
-#APP_ROOT = File.dirname(__FILE__)
-APP_ROOT = "/heatcontroll"
-LOG_PATH= "#{APP_ROOT}/tmp"
+# APP_ROOT = File.dirname(__FILE__)
+APP_ROOT = '/heatcontroll'
+LOG_PATH = "#{APP_ROOT}/tmp"
 
-
-
-def is_running? (proc)    
+def is_running?(proc)
   proc = "[#{proc[0]}]" + proc[1..proc.size]
   pid = `ps auxwww | grep '#{proc}' | head -1 | awk '{print $2}'`
   return false if pid.empty?
   pid
 end
 
-
-def stop (proc, wait=false)
+def stop(proc, wait = false)
   # kill
   term = 15
   # terminate
-  kill = 9 
-  pid = is_running?(proc)  
+  kill = 9
+  pid = is_running?(proc)
   if pid
     `kill -#{term} #{pid} `
-    3.times do | i |   
+    3.times do |i|
       puts "wating for process to finish #{i}"
       sleep(1)
     end if wait
     # wait the process to go fallback
-    `kill -#{kill} #{pid} ` 
+    `kill -#{kill} #{pid} `
     puts "#{proc} Killed "
   else
     puts "#{proc} is not running "
-  end  
+  end
 end
 
-def restart (proc, wait=false)
+def restart(proc, _wait = false)
   # terminate
   int = 2
-  pid = is_running?(proc)  
+  pid = is_running?(proc)
   if pid
     `kill -#{int} #{pid} `
     puts "#{proc} restarted "
   else
     puts "#{proc} is not running "
-  end  
-end
-
-
-
-def start(proc)
-  base = File.basename( proc , ".*" )
-  if !is_running?(proc)  
-    system "ruby #{APP_ROOT}/#{proc} >> #{LOG_PATH}/#{base}.log 2>&1 &"
-    puts "#{base} started"
-  else
-    puts "#{base} already running"    
   end
 end
 
-
-command = ARGV[0] || ""
-
-
-if command == "start"
-  start("lcd_server.rb")      
-  start("led_server.rb")   
-  sleep(3)   
-  start("heat_controller.rb")      
-elsif command =="stop" 
-  stop("lcd_server.rb")   
-  stop("led_server.rb")   
-  stop("heat_controller.rb", true)      
-elsif command =="restart" 
-  restart("lcd_server.rb")   
-  #stop("heat_controller.rb", true)      
+def start(proc)
+  base = File.basename(proc, '.*')
+  if !is_running?(proc)
+    system "ruby #{APP_ROOT}/#{proc} >> #{LOG_PATH}/#{base}.log 2>&1 &"
+    puts "#{base} started"
+  else
+    puts "#{base} already running"
+  end
 end
 
+command = ARGV[0] || ''
+
+if command == 'start'
+  start('lcd_server.rb')
+  start('led_server.rb')
+  sleep(3)
+  start('heat_controller.rb')
+elsif command == 'stop'
+  stop('lcd_server.rb')
+  stop('led_server.rb')
+  stop('heat_controller.rb', true)
+elsif command == 'restart'
+  restart('lcd_server.rb')
+  # stop("heat_controller.rb", true)
+end
