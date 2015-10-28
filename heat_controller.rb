@@ -179,8 +179,9 @@ module HeatController
         init
         config = ConfigReader.config
         loop do
-            Lcd.sline('Temperaturen'.to_16 + 'werden abgefragt')
-            sleep(1)
+            Lcd.sline('Bitte warten..'.to_16,2 )
+            Lcd.sline('Temperaturen'.to_16 + 'wird abgefragt')
+            sleep(MAIN_LOOP_INTERVALL)
           
           @status =""  		
           if read_temperature
