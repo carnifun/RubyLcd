@@ -8,6 +8,7 @@ module HeatController
          socket = TCPSocket.open('127.0.0.1', '2000')
          socket.print(request) # Send request
          socket.close
+	 #log "sent #{request}"
          true
        rescue
          return false

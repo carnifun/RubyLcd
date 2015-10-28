@@ -37,9 +37,10 @@ module RubyLcd
     end
 
     def run
-	puts "got message #{@object}" 
+	log "got message #{@object}" 
       Server.gracefull_stop_others
       sleep(0.2)
+      log 'KILL detected Exiting' if Thread.current['KILL']
       Thread.current.kill if Thread.current['KILL']
       return if @object.nil?
       if @object[:single_line]
@@ -59,8 +60,8 @@ module RubyLcd
     STATUS_INTERUPT = 1
 
     def self.gracefull_stop_others
-      puts ' Start killing  '
-      puts " We are in Thread ===>#{Thread.current.object_id}<=== Count = #{Thread.list.length}"
+      log ' Start killing  '
+      log " We are in Thread ===>#{Thread.current.object_id}<=== Count = #{Thread.list.length}"
       Thread.list.each do |t|
         if t.object_id != Thread.current.object_id && t.object_id != Thread.main.object_id
           t['KILL'] = 'SET'
@@ -97,6 +98,7 @@ module RubyLcd
           message = client.gets
           # puts "server got message #{message} "
           unless message.nil?
+		log "LCd got #{message}"
             r = Request.new(message)
             r.run unless r.nil?
             # client.puts "responce"

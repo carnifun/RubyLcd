@@ -16,7 +16,7 @@ Dir["#{APP_ROOT}/classes/*.rb"].each { |f| load f }
 SIM_MODE = false
 
 module HeatController
-  MAIN_LOOP_INTERVALL = 5
+  MAIN_LOOP_INTERVALL = 20
   class MainController
     require 'fileutils'
 
@@ -46,7 +46,7 @@ module HeatController
 
       def update_status
         config = ConfigReader.config
-        status = ''
+        status = @status
 
         last_sensor_data = sensor_data = @sensor_data.last
         last_sensor_data = @sensor_data.last(2).first if @sensor_data.length > 1
@@ -76,7 +76,7 @@ module HeatController
         config[:sensors].each do |s|
           sensor_data[s[:id]] = read_sensor_temperatur(s[:id])
           if sensor_data[s[:id]] < 1
-            Lcd.mlines('Achtung '.to_16 + "#{s[:name]} defekt!")
+            @status +='Achtung '.to_16 + "#{s[:name]} defekt!"
             return_value = false
           end
         end
@@ -163,7 +163,7 @@ module HeatController
       def init
         @sensor_data = []
         # wait for lcd server to go up
-        # wait_for_lcd_server
+        wait_for_lcd_server
         ConfigReader.read_config_file
         ConfigReader.reload_config if ConfigReader.detect_usb_drive
         RelaisCard.init
@@ -179,6 +179,7 @@ module HeatController
         init
         config = ConfigReader.config
         loop do
+          @status =""  		
           if read_temperature
             Led.okay
           else
@@ -198,7 +199,6 @@ module HeatController
           update_status
           sleep(MAIN_LOOP_INTERVALL)
           touch_pid_file
-          log 'main loop'
         end
       end
     end

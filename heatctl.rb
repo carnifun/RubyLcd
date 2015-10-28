@@ -4,7 +4,7 @@
 
 # APP_ROOT = File.dirname(__FILE__)
 APP_ROOT = '/heatcontroll'
-LOG_PATH = "#{APP_ROOT}/tmp"
+LOG_PATH = "#{APP_ROOT}/log"
 
 def is_running?(proc)
   proc = "[#{proc[0]}]" + proc[1..proc.size]

@@ -12,7 +12,8 @@ module RubyLcd
       Lcd1602Driver
     end
     def print(args)
-      driver.cls
+      #driver.cls
+      log "printing #{args}"	
       driver.print(args)
     end
     def print_top(message)
@@ -162,8 +163,8 @@ module RubyLcd
         write(byte[4..7].to_i(2))
 
         @@charCount += 1
-        log 'Stop im Driver detected Exiting' if Thread.current['STOP']
-        Thread.current.kill if Thread.current['STOP']
+        log 'Stop im Driver detected Exiting' if Thread.current['KILL']
+        Thread.current.kill if Thread.current['KILL']
       end
 
       def cls
@@ -236,6 +237,7 @@ module RubyLcd
         step = 0.2
         t = 0
         loop do
+log 'Stop im Driver detected Exiting' if Thread.current['KILL']
           Thread.current.kill if Thread.current['KILL']
           break if t >= wait_s
           t += step
