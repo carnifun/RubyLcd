@@ -32,34 +32,6 @@ module HeatController
         end
       end
 
-      def _fallback_programm
-        comodule HeatController
-  class Lcd
-    def self.lcd_file
-      return @lcd_file unless @lcd_file.nil?
-      @lcd_file = File.open('/heatcontroll/lcd_tmp/lcd_file', 'w+')
-    end
-
-    def self.sline(msg, _row = 1)
-      mlines(msg)
-    end
-
-    def self.mlines(msg)
-      lcd_file.truncate(0)
-      lcd_file.puts(msg)
-      lcd_file.fsync
-      #	lcd_file.close
-      # @lcd_file = nil
-    end
-  end
-end
-nfig = ConfigReader.config
-        config[:actuators].each do |actuator|
-          RelaisCard.send(actuator[:fallback_state], actuator[:channel])
-          # Lcd.sline("#{actuator[:name]}=>#{actuator[:fallback_state]=="on"? "An": "Aus"}")
-        end
-        log 'Fallback programm activated'
-      end
 
       def read_sensor_temperatur(sensor_id)
         sfile = "/sys/bus/w1/devices/#{sensor_id}/w1_slave"
