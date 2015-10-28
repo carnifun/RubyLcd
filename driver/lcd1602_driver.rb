@@ -1,11 +1,11 @@
-    class String
-      def to_40
-        self + " " * (40 - size)
-      end
-    end
+class String
+  def to_40
+    self + ' ' * (40 - size)
+  end
+end
 module RubyLcd
-     TOP_ROW = "1"  
-      BOTTOM_ROW = "2"  
+  TOP_ROW = '1'
+  BOTTOM_ROW = '2'
   class << self
     def driver
       Lcd1602Driver.init unless Lcd1602Driver.initialized?
@@ -13,23 +13,23 @@ module RubyLcd
     end
     def print(args)
       driver.cls
-      driver.print(args)      
+      driver.print(args)
     end
     def print_top(message)
       driver.cls
-      driver.print({text: message, single_line: TOP_ROW})      
+      driver.print(text: message, single_line: TOP_ROW)
     end
     def print_bottom(message)
       driver.cls
-      driver.print({text: message, single_line: BOTTOM_ROW})      
+      driver.print(text: message, single_line: BOTTOM_ROW)
     end
-    def flash(message)      
+    def flash(message)
       driver.cls
-      driver.print({text: message, flash: true})      
+      driver.print(text: message, flash: true)
     end
-    def clear(args=nil)
+    def clear(_args = nil)
       driver.cls
-      driver.cls()      
+      driver.cls
     end
   end
 
@@ -42,7 +42,7 @@ module RubyLcd
     # Pin layout for LCD, the PI GPIO pins are between brackets, the wiringPI pinnumber is after the slash:
     # 01 Ground
     # 02 VCC - 5v
-    # 03 Contrast adjustment (VO) from potentio meter 4,7 kOhm to Ground 
+    # 03 Contrast adjustment (VO) from potentio meter 4,7 kOhm to Ground
     # 04 (25/6) Register select (RS), RS=0: Command, RS=1: Data
     # 05 (1/?) Read/Write (R/W) R/W=0: Write, R/W=1: read (This pin is not used/always set to 1)
     # 06 (24/5) Clock (Enable) Falling edge triggered
@@ -54,17 +54,17 @@ module RubyLcd
     # 12 (17/0) Bit 5
     # 13 (21/2) Bit 6
     # 14 (22/3) Bit 7
-    # 15 Backlight LED Anode (+) 1 KOhm to Vcc 5v 
+    # 15 Backlight LED Anode (+) 1 KOhm to Vcc 5v
     # 16 Backlight LED Cathode (-)
 
-    T_MS = 1.0000000/1000000
+    T_MS = 1.0000000 / 1_000_000
     P_RS = 11 # GPIO 7
-    P_RW = 99 #Bogus number not used at this moment
+    P_RW = 99 # Bogus number not used at this moment
     P_EN = 10 # 8
-    P_D0 = 99 #Bogus number not used at this moment
-    P_D1 = 99 #Bogus number not used at this moment
-    P_D2 = 99 #Bogus number not used at this moment
-    P_D3 = 99 #Bogus number not used at this moment
+    P_D0 = 99 # Bogus number not used at this moment
+    P_D1 = 99 # Bogus number not used at this moment
+    P_D2 = 99 # Bogus number not used at this moment
+    P_D3 = 99 # Bogus number not used at this moment
     P_D4 = 6 # 25
     P_D5 = 5 # 24
     P_D6 = 4 # 23
@@ -100,21 +100,21 @@ module RubyLcd
           Wiringpi.pinMode(P_D6, 1)
           Wiringpi.pinMode(P_D7, 1)
 
-          initDisplay()
+          initDisplay
           sleep T_MS * 10
           lcdDisplay(ON, OFF, OFF)
-          setEntryMode()
+          setEntryMode
           @@initialized = true
         end
       end
 
-      def setEntryMode()
+      def setEntryMode
         # Entry mode set: move cursor to right after each DD/CGRAM write
         command(0)
         command(0b0110)
       end
 
-      def pulseEnable()
+      def pulseEnable
         # Indicate to LCD that command should be 'executed'
         Wiringpi.digitalWrite(P_EN, 0)
         sleep T_MS * 10
@@ -131,8 +131,9 @@ module RubyLcd
         Wiringpi.digitalWrite(P_D5, byte & P_D5_BIT_MASK)
         Wiringpi.digitalWrite(P_D4, byte & P_D4_BIT_MASK)
         sleep T_MS
-        pulseEnable()
+        pulseEnable
       end
+
       def command(byte)
         Wiringpi.digitalWrite(P_RS, 0)
         Wiringpi.digitalWrite(P_D7, byte & P_D7_BIT_MASK)
@@ -140,7 +141,7 @@ module RubyLcd
         Wiringpi.digitalWrite(P_D5, byte & P_D5_BIT_MASK)
         Wiringpi.digitalWrite(P_D4, byte & P_D4_BIT_MASK)
         sleep T_MS
-        pulseEnable()
+        pulseEnable
       end
 
       # Turn on display and cursor
@@ -155,35 +156,33 @@ module RubyLcd
       def write_char(byte)
         # Write data to CGRAM/DDRAM
         # write left and right byte
-        
-        while byte.size < 8 do 
-          byte = "0" + byte 
-        end
+
+        byte = '0' + byte while byte.size < 8
         write(byte[0..3].to_i(2))
         write(byte[4..7].to_i(2))
-        
+
         @@charCount += 1
-        log "Stop im Driver detected Exiting" if Thread.current["STOP"]        
-        Thread.current.kill if Thread.current["STOP"]        
+        log 'Stop im Driver detected Exiting' if Thread.current['STOP']
+        Thread.current.kill if Thread.current['STOP']
       end
 
-      def cls()
+      def cls
         # Clear all data from screen
         command(0)
         command(0b0001)
       end
-      #LCD_SETDDRAMADDR = 0x80
-      #def set_cursor ( col, row )
+      # LCD_SETDDRAMADDR = 0x80
+      # def set_cursor ( col, row )
       #  row_offsets = [ 0x00, 0x40, 0x14, 0x54]
-                  
-        # command(LCD_SETDDRAMADDR | (col + row_offsets[row]));
-      #end
 
-      def initDisplay()
+      # command(LCD_SETDDRAMADDR | (col + row_offsets[row]));
+      # end
+
+      def initDisplay
         # Set function to 4 bit operation
         i = 0
-        3.times do    # Needs to be executed 3 times
-        # Wait > 40 MS
+        3.times do # Needs to be executed 3 times
+          # Wait > 40 MS
           sleep 42 * T_MS
           command(0b0011)
         end
@@ -212,109 +211,97 @@ module RubyLcd
         # Entry mode set"
         command(0)
 
-        #P_D5 1 = Increment by 1
-        #P_D4 0 = no shift
+        # P_D5 1 = Increment by 1
+        # P_D4 0 = no shift
         command(0b0111)
-
       end
 
       def write_string(string)
         # Loop through each character in the string, convert it to binary, and print it to the LCD
-        
+
         lines = string.scan(/.{1,40}/)
-        #puts "Buffer "
-        #puts lines.inspect
-        #puts "Buffer "
-        lines.each do | l | 
-          l.each_byte do | b |
-              write_char(b.to_s(2))
-          end        
-        end                
-        #@@string_buffer ||=[]
-        #@@string_buffer << string        
-      end
-      
-      def sleep_or_exit ( wait_s )
-         step = RubyLcd::Server::MAIN_WAIT_INTERVAL
-         t = 0 
-          loop do 
-            return true if RubyLcd::Server.file_changed? 
-            break if t >= wait_s  
-            t += step            
-            sleep(step)
+        # puts "Buffer "
+        # puts lines.inspect
+        # puts "Buffer "
+        lines.each do |l|
+          l.each_byte do |b|
+            write_char(b.to_s(2))
           end
-          false
+        end
+        # @@string_buffer ||=[]
+        # @@string_buffer << string
       end
-      def print_single_line (args)
-                
+
+      def sleep_or_exit(wait_s)
+        step = RubyLcd::Server::MAIN_WAIT_INTERVAL
+        t = 0
+        loop do
+          Thread.current.kill if Thread.current['KILL']
+          break if t >= wait_s
+          t += step
+          sleep(step)
+        end
+        false
+      end
+
+      def print_single_line(args)
         text = args[:text]
-                
-        extra_text = args[:extra_text] || " ".to_40
-        if extra_text              
+
+        extra_text = args[:extra_text] || ' '.to_40
+        if extra_text
           extra_text = extra_text.scan(/.{1,40}/).first
           extra_text = extra_text.to_40
-        end          
-        start_pos = 0 
+        end
+        start_pos = 0
         loop do
-          end_pos = (start_pos + 15 > text.size-1) ?  text.size-1 : start_pos + 15    
+          end_pos = (start_pos + 15 > text.size - 1) ? text.size - 1 : start_pos + 15
           line = text[start_pos..end_pos]
-          line = line.to_40          
-          line = (args[:single_line] == TOP_ROW) ? line + extra_text : extra_text + line   
+          line = line.to_40
+          line = (args[:single_line] == TOP_ROW) ? line + extra_text : extra_text + line
           write_string(line)
-          if start_pos == 0
-            break if sleep_or_exit(1)             
-          end
-          start_pos +=1
-          if start_pos >= end_pos
-            start_pos = 0
-          end 
+          break if sleep_or_exit(1) if start_pos == 0
+          start_pos += 1
+          start_pos = 0 if start_pos >= end_pos
           break if sleep_or_exit(0.8)
-          break if text.size <16
-        end        
+          break if text.size < 16
+        end
       end
-      def print_multi_lines (args)        
+
+      def print_multi_lines(args)
         text = args[:text]
         lines = text.scan(/.{1,16}/)
-        lines = lines.map{|p| p.to_40}
-        lines << " ".to_40 if lines.size.odd?
-        
-        pages = lines.each_slice(2).map do | top_line, bottom_line |
+        lines = lines.map(&:to_40)
+        lines << ' '.to_40 if lines.size.odd?
+
+        pages = lines.each_slice(2).map do |top_line, bottom_line|
           top_line + bottom_line
         end
         exit_loop = false
-        loop do 
-          pages.each do | page_text |
+        loop do
+          pages.each do |page_text|
             write_string(page_text)
             exit_loop = sleep_or_exit(PAGES_VIEW_INTERVALL)
-            puts "exit_loop #{exit_loop}"          
+            puts "exit_loop #{exit_loop}"
             break if exit_loop
             break if pages.size == 1
           end
-          break if (args[:flash] || pages.size == 1 || exit_loop)
+          break if args[:flash] || pages.size == 1 || exit_loop
           puts " Done #{exit_loop}"
-        end        
-        puts " Bin raus "
+        end
+        puts ' Bin raus '
       end
-      def print (args)
-        args = {text: args} if args.is_a?(String)
-        args[:text] = args[:text].force_encoding('BINARY').encode('ASCII', :invalid => :replace, :undef => :replace, :replace => '')
-        args[:extra_text] = args[:extra_text].force_encoding('BINARY').encode('ASCII', :invalid => :replace, :undef => :replace, :replace => '') if args[:extra_text]
-        single_line    = args[:single_line] || false
-        if single_line         
-          print_single_line(args) 
+
+      def print(args)
+        args = { text: args } if args.is_a?(String)
+        args[:text] = args[:text].force_encoding('BINARY').encode('ASCII', invalid: :replace, undef: :replace, replace: '')
+        args[:extra_text] = args[:extra_text].force_encoding('BINARY').encode('ASCII', invalid: :replace, undef: :replace, replace: '') if args[:extra_text]
+        single_line = args[:single_line] || false
+        if single_line
+          print_single_line(args)
         else
           print_multi_lines(args)
-        end 
+        end
       end
-
-     
-
-     
-
-      
-
-
     end
   end
 end
-
