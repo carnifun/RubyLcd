@@ -13,7 +13,7 @@ module RubyLcd
     end
     def print(args)
       #driver.cls
-      log "printing #{args}"	
+      log "Driver Printing #{args}"	
       driver.print(args)
     end
     def print_top(message)
@@ -163,7 +163,6 @@ module RubyLcd
         write(byte[4..7].to_i(2))
 
         @@charCount += 1
-        log 'Stop im Driver detected Exiting' if Thread.current['KILL']
         Thread.current.kill if Thread.current['KILL']
       end
 
@@ -237,7 +236,6 @@ module RubyLcd
         step = 0.2
         t = 0
         loop do
-log 'Stop im Driver detected Exiting' if Thread.current['KILL']
           Thread.current.kill if Thread.current['KILL']
           break if t >= wait_s
           t += step
@@ -283,14 +281,11 @@ log 'Stop im Driver detected Exiting' if Thread.current['KILL']
           pages.each do |page_text|
             write_string(page_text)
             exit_loop = sleep_or_exit(PAGES_VIEW_INTERVALL)
-            puts "exit_loop #{exit_loop}"
             break if exit_loop
             break if pages.size == 1
           end
           break if args[:flash] || pages.size == 1 || exit_loop
-          puts " Done #{exit_loop}"
         end
-        puts ' Bin raus '
       end
 
       def print(args)

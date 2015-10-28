@@ -2,7 +2,7 @@ APP_ROOT ||= '/heatcontroll'
 class Logger
   class << self
     CONSOLE = false
-    DEBUG = true
+    DEBUG = false
     @@initialized = false
     @@logger_handler = false
     def initialized?
