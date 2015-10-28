@@ -161,6 +161,7 @@ module HeatController
       end
 
       def init
+        @status=""
         @sensor_data = []
         # wait for lcd server to go up
         wait_for_lcd_server
@@ -179,6 +180,7 @@ module HeatController
         init
         config = ConfigReader.config
         loop do
+          @status = ""
           if read_temperature
             Led.okay
           else
