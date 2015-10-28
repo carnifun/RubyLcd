@@ -16,7 +16,7 @@ Dir["#{APP_ROOT}/classes/*.rb"].each { |f| load f }
 SIM_MODE = false
 
 module HeatController
-  MAIN_LOOP_INTERVALL = 20
+  MAIN_LOOP_INTERVALL = 10
   class MainController
     require 'fileutils'
 
@@ -179,6 +179,9 @@ module HeatController
         init
         config = ConfigReader.config
         loop do
+            Lcd.sline('Temperaturen'.to_16 + 'werden abgefragt')
+            sleep(1)
+          
           @status =""  		
           if read_temperature
             Led.okay
