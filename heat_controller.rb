@@ -76,7 +76,7 @@ module HeatController
         config[:sensors].each do |s|
           sensor_data[s[:id]] = read_sensor_temperatur(s[:id])
           if sensor_data[s[:id]] < 1
-            @status +='Achtung '.to_16 + "#{s[:name]} defekt!"
+            @status +='Achtung '.to_16 + "#{s[:name]} defekt!".to_16
             return_value = false
           end
         end
