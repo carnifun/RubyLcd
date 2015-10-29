@@ -93,9 +93,9 @@ module HeatController
           Lcd.mlines('Usb erkannt')
           sleep(1)
           system('umount /media/usb')
-          log (' Unmounting usb ')
+          log ' Unmounting usb ')
           sleep(5)
-          log (' mounting usb ')
+          log(' mounting usb ')
           system("mount -t vfat -o rw #{usb_path} /media/usb")
           sleep(2)
           Lcd.mlines('Usb-media Wird gelesen')
@@ -106,10 +106,11 @@ module HeatController
             sleep(5)
             log(' copy file from usb to drive ')
             FileUtils.cp('/media/usb/config.json', '/heatcontroll/config/config.json.new')
-            return true
+            
           else
             Lcd.mlines('config.json     NICHT gefunden!')
             sleep(2)
+            return false
           end
           if File.exist?('/media/usb/wpa_supplicant.conf')
             log (' Network config found  ')
@@ -122,11 +123,8 @@ module HeatController
             system('reboot')
             exit(0)
             #return true
-          else
-            Lcd.mlines('config.json     NICHT gefunden!')
           end
-          
-          
+          return true          
         end
         false
         end
