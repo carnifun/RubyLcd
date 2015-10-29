@@ -17,6 +17,8 @@ SIM_MODE = false
 
 module HeatController
   MAIN_LOOP_INTERVALL = 20
+  MAX_SENSOR_TEMP = 81
+  MIN_SENSOR_TEMP = 3    
   class MainController
     require 'fileutils'
 
@@ -75,7 +77,7 @@ module HeatController
         sensor_data = {}
         config[:sensors].each do |s|
           sensor_data[s[:id]] = read_sensor_temperatur(s[:id])
-          if sensor_data[s[:id]] < 1
+          if sensor_data[s[:id]] < MIN_SENSOR_TEMP || sensor_data[s[:id]] > MAX_SENSOR_TEMP
             @status +='Achtung '.to_16 + "#{s[:name]} defekt!".to_16
             return_value = false
           end
