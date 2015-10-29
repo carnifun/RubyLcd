@@ -109,7 +109,24 @@ module HeatController
             return true
           else
             Lcd.mlines('config.json     NICHT gefunden!')
+            sleep(2)
           end
+          if File.exist?('/media/usb/wpa_supplicant.conf')
+            log (' Network config found  ')
+            Lcd.mlines('Netwerk Datei  gefunden')
+            sleep(2)
+            log(' copy file from usb to drive ')
+            FileUtils.cp('/media/usb/wpa_supplicant.conf', '/etc/wpa_supplicant/wpa_supplicant.conf')
+            Lcd.mlines('System Reboot'.to_16 + 'Usb entfernen.')
+            sleep(5)
+            system('reboot')
+            exit(0)
+            #return true
+          else
+            Lcd.mlines('config.json     NICHT gefunden!')
+          end
+          
+          
         end
         false
         end
