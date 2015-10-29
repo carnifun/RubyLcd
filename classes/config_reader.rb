@@ -93,7 +93,7 @@ module HeatController
           Lcd.mlines('Usb erkannt')
           sleep(1)
           system('umount /media/usb')
-          log ' Unmounting usb ')
+          log ' Unmounting usb '
           sleep(5)
           log(' mounting usb ')
           system("mount -t vfat -o rw #{usb_path} /media/usb")
