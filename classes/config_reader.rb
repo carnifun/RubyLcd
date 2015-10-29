@@ -105,8 +105,7 @@ module HeatController
             Lcd.mlines('Konfig Datei  gefunden')
             sleep(5)
             log(' copy file from usb to drive ')
-            FileUtils.cp('/media/usb/config.json', '/heatcontroll/config/config.json.new')
-            
+            FileUtils.cp('/media/usb/config.json', '/heatcontroll/config/config.json.new')            
           else
             Lcd.mlines('config.json     NICHT gefunden!')
             sleep(2)
@@ -118,6 +117,7 @@ module HeatController
             sleep(2)
             log(' copy file from usb to drive ')
             FileUtils.cp('/media/usb/wpa_supplicant.conf', '/etc/wpa_supplicant/wpa_supplicant.conf')
+            reload_config            
             Lcd.mlines('System Reboot'.to_16 + 'Usb entfernen.')
             sleep(5)
             system('reboot')
